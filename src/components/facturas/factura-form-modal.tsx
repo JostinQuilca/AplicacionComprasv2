@@ -18,7 +18,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import type { FacturaCompra, Proveedor, Producto, FacturaDetalle } from "@/lib/types";
 import { FacturaCompraSchema } from "@/lib/types";
-import { addFactura, updateFactura, getDetallesByFacturaId, type ActionResponse as FacturaActionResponse } from "@/app/facturas/actions";
+import { addFactura, updateFactura, getDetallesByFacturaId } from "@/app/facturas/actions";
 import { addDetalle, deleteDetalle } from "@/app/detalles-factura/actions";
 import { Combobox } from "../ui/combobox";
 import { Separator } from "../ui/separator";
@@ -178,29 +178,30 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
         try {
             const newFacturaId = factura.id;
             
-            // 1. Delete all original details
+            // Delete original details first
             if (initialDetalles.length > 0) {
                 const deletePromises = initialDetalles.map(d => deleteDetalle(d.id, d.factura_id));
                 await Promise.all(deletePromises);
             }
             
-            // 2. Add all current details
+            // Add all current details
             if (detalles.length > 0) {
                 const addPromises = detalles.map(detalle => {
                     const detailFormData = new FormData();
-                    Object.entries(detalle).forEach(([key, value]) => {
-                        if (value !== null && value !== undefined) {
-                            if (key === 'aplica_iva' && value === true) detailFormData.append(key, 'on');
-                            else if (key !== 'aplica_iva') detailFormData.append(key, String(value));
-                        }
-                    });
                     detailFormData.append('factura_id', String(newFacturaId));
+                    detailFormData.append('producto_id', String(detalle.producto_id));
+                    detailFormData.append('cantidad', String(detalle.cantidad));
+                    detailFormData.append('precio_unitario', String(detalle.precio_unitario));
+                    detailFormData.append('nombre_producto', detalle.nombre_producto);
+                    if (detalle.aplica_iva) {
+                        detailFormData.append('aplica_iva', 'on');
+                    }
                     return addDetalle(null, detailFormData);
                 });
                 await Promise.all(addPromises);
             }
             
-            // 3. Finally, update the header, which will revalidate the paths
+            // Finally, update the header, which will revalidate the paths
             const headerResult = await updateFactura(factura.id, null, headerFormData);
             if (!headerResult.success) {
                 toast({ title: "Error al actualizar factura", description: headerResult.message, variant: "destructive" });
@@ -226,13 +227,14 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
         const newFacturaId = headerResult.data.id;
         const detailPromises = detalles.map(detalle => {
           const detailFormData = new FormData();
-          Object.entries(detalle).forEach(([key, value]) => {
-              if (value !== null && value !== undefined) {
-                  if (key === 'aplica_iva' && value === true) detailFormData.append(key, 'on');
-                  else if (key !== 'aplica_iva') detailFormData.append(key, String(value));
-              }
-          });
           detailFormData.append('factura_id', String(newFacturaId));
+          detailFormData.append('producto_id', String(detalle.producto_id));
+          detailFormData.append('cantidad', String(detalle.cantidad));
+          detailFormData.append('precio_unitario', String(detalle.precio_unitario));
+          detailFormData.append('nombre_producto', detalle.nombre_producto);
+          if (detalle.aplica_iva) {
+              detailFormData.append('aplica_iva', 'on');
+          }
           return addDetalle(null, detailFormData);
         });
         const detailResults = await Promise.all(detailPromises);
@@ -247,7 +249,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen} modal={false}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{isEditMode ? "Editar Factura" : "Añadir Nueva Factura"}</DialogTitle>
