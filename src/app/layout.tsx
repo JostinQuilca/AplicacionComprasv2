@@ -17,7 +17,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Procuria',
+  title: 'Módulo Compras',
   description: 'App de Gestión de Proveedores',
 };
 
@@ -39,7 +39,7 @@ export default function RootLayout({
             <SidebarHeader>
               <div className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center">
                 <Logo className="h-6 w-6 text-primary" />
-                <span className="font-semibold text-xl group-data-[collapsible=icon]:hidden">Procuria</span>
+                <span className="font-semibold text-xl group-data-[collapsible=icon]:hidden">Módulo Compras</span>
               </div>
             </SidebarHeader>
             <SidebarContent>
