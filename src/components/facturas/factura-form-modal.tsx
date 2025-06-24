@@ -207,6 +207,8 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                   detailFormData.append('nombre_producto', detalle.nombre_producto);
                   if (detalle.aplica_iva) {
                       detailFormData.append('aplica_iva', 'on');
+                  } else {
+                      detailFormData.append('aplica_iva', 'off');
                   }
                   return addDetalle(null, detailFormData);
               });
@@ -248,6 +250,8 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                   detailFormData.append('nombre_producto', detalle.nombre_producto);
                    if (detalle.aplica_iva) {
                       detailFormData.append('aplica_iva', 'on');
+                   } else {
+                      detailFormData.append('aplica_iva', 'off');
                    }
                   return addDetalle(null, detailFormData);
               });
@@ -342,6 +346,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                                 disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                                 initialFocus
                                 locale={es}
+                                formatters={{ formatWeekdayName: (day) => format(day, 'cccccc', { locale: es }) }}
                             />
                             </PopoverContent>
                         </Popover>
@@ -378,6 +383,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                                 disabled={{ before: fechaEmision }}
                                 initialFocus
                                 locale={es}
+                                formatters={{ formatWeekdayName: (day) => format(day, 'cccccc', { locale: es }) }}
                             />
                             </PopoverContent>
                         </Popover>
