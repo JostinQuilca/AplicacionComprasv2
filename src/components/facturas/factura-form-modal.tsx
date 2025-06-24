@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { format, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
 import { CalendarIcon, PlusCircle, Trash2, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -18,8 +19,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import type { FacturaCompra, Proveedor, Producto, FacturaDetalle } from "@/lib/types";
 import { FacturaCompraSchema } from "@/lib/types";
-import { addFactura, updateFactura } from "@/app/facturas/actions";
-import { addDetalle, deleteDetalle } from "@/app/detalles-factura/actions";
+import { addFactura, updateFactura, getDetallesByFacturaId } from "@/app/facturas/actions";
+import { addDetalle, deleteDetalle, updateDetalle as updateDetalleAction } from "@/app/detalles-factura/actions";
 import { Combobox } from "../ui/combobox";
 import { Separator } from "../ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
@@ -46,7 +47,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
   const [isLoadingDetails, startDetailsTransition] = useTransition();
 
   const [detalles, setDetalles] = useState<ModalDetalle[]>([]);
-  const [initialDetalles, setInitialDetalles] = useState<ModalDetalle[]>([]);
+  
   const [selectedProduct, setSelectedProduct] = useState<string | undefined>();
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
@@ -68,9 +69,13 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
       fecha_vencimiento: null,
       tipo_pago: "Contado",
       estado: "Registrada",
+      subtotal: 0,
+      iva: 0,
+      total: 0,
     },
   });
-  const { reset, setValue } = form;
+  const { reset, setValue, watch } = form;
+  const fechaEmision = watch("fecha_emision");
 
   useEffect(() => {
       setValue('subtotal', totalSubtotal);
@@ -90,11 +95,13 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
           ...factura,
           fecha_emision: parseISO(factura.fecha_emision),
           fecha_vencimiento: factura.fecha_vencimiento ? parseISO(factura.fecha_vencimiento) : null,
+          subtotal: factura.subtotal,
+          iva: factura.iva,
+          total: factura.total,
         });
         startDetailsTransition(async () => {
             const existingDetails = await getDetallesByFacturaId(factura.id);
             setDetalles(existingDetails);
-            setInitialDetalles(existingDetails);
         });
       } else {
         reset({
@@ -104,9 +111,11 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
           fecha_vencimiento: null,
           tipo_pago: "Contado",
           estado: "Registrada",
+          subtotal: 0,
+          iva: 0,
+          total: 0,
         });
         setDetalles([]);
-        setInitialDetalles([]);
       }
     }
   }, [factura, isOpen, isEditMode, reset]);
@@ -140,7 +149,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
 
     const nuevoDetalle: ModalDetalle = {
       id: 0, // Placeholder
-      factura_id: 0, // Placeholder
+      factura_id: factura?.id ?? 0, 
       tempId: `temp-${Date.now()}`,
       producto_id: product.id_producto,
       nombre_producto: product.nombre,
@@ -167,50 +176,59 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
 
   const onSubmit = (data: FacturaFormData) => {
     startTransition(async () => {
-      const headerFormData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (value instanceof Date) {
-          headerFormData.append(key, format(value, "yyyy-MM-dd"));
-        } else if (value !== null && value !== undefined) {
-          headerFormData.append(key, String(value));
-        }
-      });
-      
-      headerFormData.set('subtotal', String(totalSubtotal));
-      headerFormData.set('iva', String(totalIva));
-      headerFormData.set('total', String(granTotal));
+        const headerFormData = new FormData();
+        Object.entries(data).forEach(([key, value]) => {
+            if (value instanceof Date) {
+            headerFormData.append(key, format(value, "yyyy-MM-dd"));
+            } else if (value !== null && value !== undefined) {
+            headerFormData.append(key, String(value));
+            }
+        });
+        
+        headerFormData.set('subtotal', String(totalSubtotal));
+        headerFormData.set('iva', String(totalIva));
+        headerFormData.set('total', String(granTotal));
       
       try {
-          if (isEditMode) {
-              const newFacturaId = factura.id;
+          if (isEditMode && factura) {
               
-              const updateHeaderPromise = updateFactura(factura.id, null, headerFormData);
+              const existingDetails = await getDetallesByFacturaId(factura.id);
 
-              const detailsToDelete = initialDetalles.filter(id => !detalles.some(d => d.id === id.id));
-              const deletePromises = detailsToDelete.map(d => deleteDetalle(d.id, newFacturaId));
+              const detailsToDelete = existingDetails.filter(ed => !detalles.some(d => d.id === ed.id));
+              const deletePromises = detailsToDelete.map(d => deleteDetalle(d.id, factura.id));
 
-              const detailsToAdd = detalles.filter(d => !d.id);
+              const detailsToAdd = detalles.filter(d => !d.id); // New items have no 'id'
               const addPromises = detailsToAdd.map(detalle => {
                   const detailFormData = new FormData();
-                  detailFormData.append('factura_id', String(newFacturaId));
+                  detailFormData.append('factura_id', String(factura.id));
                   detailFormData.append('producto_id', String(detalle.producto_id));
                   detailFormData.append('cantidad', String(detalle.cantidad));
                   detailFormData.append('precio_unitario', String(detalle.precio_unitario));
                   detailFormData.append('nombre_producto', detalle.nombre_producto);
                   if (detalle.aplica_iva) {
                       detailFormData.append('aplica_iva', 'on');
-                  } else {
-                      detailFormData.append('aplica_iva', 'off');
                   }
                   return addDetalle(null, detailFormData);
               });
-
-              await Promise.all([updateHeaderPromise, ...deletePromises, ...addPromises]);
               
+              const detailsToUpdate = detalles.filter(d => d.id && existingDetails.some(ed => ed.id === d.id));
+              const updatePromises = detailsToUpdate.map(detalle => {
+                  const detailFormData = new FormData();
+                   detailFormData.append('factura_id', String(factura.id));
+                   detailFormData.append('producto_id', String(detalle.producto_id));
+                   detailFormData.append('cantidad', String(detalle.cantidad));
+                   detailFormData.append('precio_unitario', String(detalle.precio_unitario));
+                   detailFormData.append('aplica_iva', detalle.aplica_iva ? 'on' : 'off');
+                   detailFormData.append('nombre_producto', detalle.nombre_producto);
+                   return updateDetalleAction(detalle.id, null, detailFormData);
+              });
+              
+              await Promise.all([...deletePromises, ...addPromises, ...updatePromises]);
+              await updateFactura(factura.id, null, headerFormData);
+
               toast({ title: "Actualización Exitosa", description: "Factura y detalles actualizados con éxito." });
 
           } else {
-              // --- Create Mode ---
               if (detalles.length === 0) {
                   toast({ title: "Error", description: "Debe añadir al menos un producto a la factura.", variant: "destructive"});
                   return;
@@ -230,9 +248,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                   detailFormData.append('nombre_producto', detalle.nombre_producto);
                    if (detalle.aplica_iva) {
                       detailFormData.append('aplica_iva', 'on');
-                  } else {
-                      detailFormData.append('aplica_iva', 'off');
-                  }
+                   }
                   return addDetalle(null, detailFormData);
               });
               const detailResults = await Promise.all(detailPromises);
@@ -313,7 +329,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                                     !field.value && "text-muted-foreground"
                                 )}
                                 >
-                                {field.value ? format(field.value, "PPP") : <span>Elija una fecha</span>}
+                                {field.value ? format(field.value, "PPP", { locale: es }) : <span>Elija una fecha</span>}
                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
                             </FormControl>
@@ -325,6 +341,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                                 onSelect={field.onChange}
                                 disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                                 initialFocus
+                                locale={es}
                             />
                             </PopoverContent>
                         </Popover>
@@ -348,7 +365,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                                     !field.value && "text-muted-foreground"
                                 )}
                                 >
-                                {field.value ? format(field.value, "PPP") : <span>Elija una fecha</span>}
+                                {field.value ? format(field.value, "PPP", { locale: es }) : <span>Elija una fecha</span>}
                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
                             </FormControl>
@@ -358,7 +375,9 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                                 mode="single"
                                 selected={field.value || undefined}
                                 onSelect={field.onChange}
+                                disabled={{ before: fechaEmision }}
                                 initialFocus
+                                locale={es}
                             />
                             </PopoverContent>
                         </Popover>
