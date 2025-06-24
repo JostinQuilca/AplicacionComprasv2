@@ -18,7 +18,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import type { FacturaCompra, Proveedor, Producto, FacturaDetalle } from "@/lib/types";
 import { FacturaCompraSchema } from "@/lib/types";
-import { addFactura, updateFactura, getDetallesByFacturaId } from "@/app/facturas/actions";
+import { addFactura, updateFactura } from "@/app/facturas/actions";
 import { addDetalle, deleteDetalle } from "@/app/detalles-factura/actions";
 import { Combobox } from "../ui/combobox";
 import { Separator } from "../ui/separator";
@@ -70,7 +70,13 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
       estado: "Registrada",
     },
   });
-  const { reset } = form;
+  const { reset, setValue } = form;
+
+  useEffect(() => {
+      setValue('subtotal', totalSubtotal);
+      setValue('iva', totalIva);
+      setValue('total', granTotal);
+  }, [totalSubtotal, totalIva, granTotal, setValue]);
 
   const productOptions = productos.map(p => ({
     value: String(p.id_producto),
@@ -170,86 +176,83 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
         }
       });
       
-      headerFormData.append('subtotal', String(totalSubtotal));
-      headerFormData.append('iva', String(totalIva));
-      headerFormData.append('total', String(granTotal));
+      headerFormData.set('subtotal', String(totalSubtotal));
+      headerFormData.set('iva', String(totalIva));
+      headerFormData.set('total', String(granTotal));
       
-      if (isEditMode) {
-        try {
-            const newFacturaId = factura.id;
-            
-            // Delete original details first
-            if (initialDetalles.length > 0) {
-                const deletePromises = initialDetalles.map(d => deleteDetalle(d.id, d.factura_id));
-                await Promise.all(deletePromises);
-            }
-            
-            // Add all current details
-            if (detalles.length > 0) {
-                const addPromises = detalles.map(detalle => {
-                    const detailFormData = new FormData();
-                    detailFormData.append('factura_id', String(newFacturaId));
-                    detailFormData.append('producto_id', String(detalle.producto_id));
-                    detailFormData.append('cantidad', String(detalle.cantidad));
-                    detailFormData.append('precio_unitario', String(detalle.precio_unitario));
-                    detailFormData.append('nombre_producto', detalle.nombre_producto);
-                    if (detalle.aplica_iva) {
-                        detailFormData.append('aplica_iva', 'on');
-                    }
-                    return addDetalle(null, detailFormData);
-                });
-                await Promise.all(addPromises);
-            }
-            
-            // Finally, update the header, which will revalidate the paths
-            const headerResult = await updateFactura(factura.id, null, headerFormData);
-            if (!headerResult.success) {
-                toast({ title: "Error al actualizar factura", description: headerResult.message, variant: "destructive" });
-                return;
-            }
-            
-            toast({ title: "Actualización Exitosa", description: "Factura y detalles actualizados con éxito." });
-        } catch (error) {
-            console.error(error);
-            toast({ title: "Error Inesperado", description: "Ocurrió un error guardando la factura.", variant: "destructive" });
-        }
-      } else {
-        // --- Create Mode ---
-        if (detalles.length === 0) {
-          toast({ title: "Error", description: "Debe añadir al menos un producto a la factura.", variant: "destructive"});
-          return;
-        }
-        const headerResult = await addFactura(null, headerFormData);
-        if (!headerResult.success || !headerResult.data?.id) {
-            toast({ title: "Error al crear factura", description: headerResult.message, variant: "destructive" });
-            return;
-        }
-        const newFacturaId = headerResult.data.id;
-        const detailPromises = detalles.map(detalle => {
-          const detailFormData = new FormData();
-          detailFormData.append('factura_id', String(newFacturaId));
-          detailFormData.append('producto_id', String(detalle.producto_id));
-          detailFormData.append('cantidad', String(detalle.cantidad));
-          detailFormData.append('precio_unitario', String(detalle.precio_unitario));
-          detailFormData.append('nombre_producto', detalle.nombre_producto);
-          if (detalle.aplica_iva) {
-              detailFormData.append('aplica_iva', 'on');
+      try {
+          if (isEditMode) {
+              const newFacturaId = factura.id;
+              
+              const updateHeaderPromise = updateFactura(factura.id, null, headerFormData);
+
+              const detailsToDelete = initialDetalles.filter(id => !detalles.some(d => d.id === id.id));
+              const deletePromises = detailsToDelete.map(d => deleteDetalle(d.id, newFacturaId));
+
+              const detailsToAdd = detalles.filter(d => !d.id);
+              const addPromises = detailsToAdd.map(detalle => {
+                  const detailFormData = new FormData();
+                  detailFormData.append('factura_id', String(newFacturaId));
+                  detailFormData.append('producto_id', String(detalle.producto_id));
+                  detailFormData.append('cantidad', String(detalle.cantidad));
+                  detailFormData.append('precio_unitario', String(detalle.precio_unitario));
+                  detailFormData.append('nombre_producto', detalle.nombre_producto);
+                  if (detalle.aplica_iva) {
+                      detailFormData.append('aplica_iva', 'on');
+                  } else {
+                      detailFormData.append('aplica_iva', 'off');
+                  }
+                  return addDetalle(null, detailFormData);
+              });
+
+              await Promise.all([updateHeaderPromise, ...deletePromises, ...addPromises]);
+              
+              toast({ title: "Actualización Exitosa", description: "Factura y detalles actualizados con éxito." });
+
+          } else {
+              // --- Create Mode ---
+              if (detalles.length === 0) {
+                  toast({ title: "Error", description: "Debe añadir al menos un producto a la factura.", variant: "destructive"});
+                  return;
+              }
+              const headerResult = await addFactura(null, headerFormData);
+              if (!headerResult.success || !headerResult.data?.id) {
+                  toast({ title: "Error al crear factura", description: headerResult.message, variant: "destructive" });
+                  return;
+              }
+              const newFacturaId = headerResult.data.id;
+              const detailPromises = detalles.map(detalle => {
+                  const detailFormData = new FormData();
+                  detailFormData.append('factura_id', String(newFacturaId));
+                  detailFormData.append('producto_id', String(detalle.producto_id));
+                  detailFormData.append('cantidad', String(detalle.cantidad));
+                  detailFormData.append('precio_unitario', String(detalle.precio_unitario));
+                  detailFormData.append('nombre_producto', detalle.nombre_producto);
+                   if (detalle.aplica_iva) {
+                      detailFormData.append('aplica_iva', 'on');
+                  } else {
+                      detailFormData.append('aplica_iva', 'off');
+                  }
+                  return addDetalle(null, detailFormData);
+              });
+              const detailResults = await Promise.all(detailPromises);
+              if (detailResults.some(r => !r.success)) {
+                  toast({ title: "Factura Creada con Errores", description: `El encabezado se guardó, pero algunos productos no.`, variant: "destructive" });
+              } else {
+                  toast({ title: "Éxito", description: "Factura y detalles creados correctamente." });
+              }
           }
-          return addDetalle(null, detailFormData);
-        });
-        const detailResults = await Promise.all(detailPromises);
-        if (detailResults.some(r => !r.success)) {
-            toast({ title: "Factura Creada con Errores", description: `El encabezado se guardó, pero algunos productos no.`, variant: "destructive" });
-        } else {
-            toast({ title: "Éxito", description: "Factura y detalles creados correctamente." });
-        }
+          setIsOpen(false);
+
+      } catch (error) {
+          console.error(error);
+          toast({ title: "Error Inesperado", description: `Ocurrió un error guardando la factura: ${error instanceof Error ? error.message : 'Error desconocido'}`, variant: "destructive" });
       }
-      setIsOpen(false);
     });
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen} modal={false}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{isEditMode ? "Editar Factura" : "Añadir Nueva Factura"}</DialogTitle>
