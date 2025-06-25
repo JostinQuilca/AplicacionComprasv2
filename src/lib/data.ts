@@ -35,8 +35,17 @@ export async function getProveedores(): Promise<Proveedor[]> {
 }
 
 export async function getFacturas(): Promise<FacturaCompra[]> {
-  const data = await fetchData<FacturaCompra[]>(`${API_BASE_URL_COMPRAS}/facturas`, []);
-  return Array.isArray(data) ? data : [];
+  const data = await fetchData<any[]>(`${API_BASE_URL_COMPRAS}/facturas`, []);
+  if (!Array.isArray(data)) {
+    console.error("API response for facturas is not an array:", data);
+    return [];
+  }
+  return data.map((factura) => ({
+    ...factura,
+    subtotal: parseFloat(factura.subtotal) || 0,
+    iva: parseFloat(factura.iva) || 0,
+    total: parseFloat(factura.total) || 0,
+  }));
 }
 
 export async function getProductos(): Promise<Producto[]> {
@@ -48,12 +57,23 @@ export async function getProductos(): Promise<Producto[]> {
 }
 
 export async function getDetalles(): Promise<FacturaDetalle[]> {
-    const data = await fetchData<FacturaDetalle[]>(`${API_BASE_URL_COMPRAS}/detalles-factura`, []);
-    return Array.isArray(data) ? data : [];
+    const data = await fetchData<any[]>(`${API_BASE_URL_COMPRAS}/detalles-factura`, []);
+    if (!Array.isArray(data)) {
+        console.error("API response for detalles-factura is not an array:", data);
+        return [];
+    }
+    return data.map(detalle => ({
+        ...detalle,
+        cantidad: parseInt(String(detalle.cantidad), 10) || 0,
+        precio_unitario: parseFloat(String(detalle.precio_unitario)) || 0,
+        subtotal: parseFloat(String(detalle.subtotal)) || 0,
+        iva: parseFloat(String(detalle.iva)) || 0,
+        total: parseFloat(String(detalle.total)) || 0,
+    }));
 }
 
 export async function getFactura(id: number): Promise<(FacturaCompra & {nombre_proveedor: string}) | null> {
-    const factura = await fetchData<FacturaCompra | null>(`${API_BASE_URL_COMPRAS}/facturas/${id}`, null);
+    const factura = await fetchData<any | null>(`${API_BASE_URL_COMPRAS}/facturas/${id}`, null);
 
     if (!factura || typeof factura !== 'object') {
         return null;
@@ -67,5 +87,11 @@ export async function getFactura(id: number): Promise<(FacturaCompra & {nombre_p
         }
     }
     
-    return { ...factura, nombre_proveedor };
+    return {
+        ...factura,
+        nombre_proveedor,
+        subtotal: parseFloat(factura.subtotal) || 0,
+        iva: parseFloat(factura.iva) || 0,
+        total: parseFloat(factura.total) || 0,
+    };
 }
