@@ -37,7 +37,7 @@ const DialogContent = React.forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
-      onPointerDownOutside={(e) => {
+      onInteractOutside={(e) => {
         const target = e.target as HTMLElement;
         // Prevent dialog from closing when interacting with nested popovers (e.g., Combobox, Calendar)
         if (target.closest('[data-popover-content]')) {
