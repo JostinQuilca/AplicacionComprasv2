@@ -57,6 +57,7 @@ export async function addDetalle(
     }
 
     revalidatePath(`/detalles-factura?factura_id=${dataToSubmit.factura_id}`);
+    revalidatePath('/facturas');
     return { success: true, message: "Detalle añadido con éxito." };
   } catch (error: unknown) {
     return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
@@ -113,6 +114,7 @@ export async function updateDetalle(
     }
     
     revalidatePath(`/detalles-factura?factura_id=${dataToSubmit.factura_id}`);
+    revalidatePath('/facturas');
     return { success: true, message: "Detalle actualizado con éxito." };
   } catch (error: unknown) {
      return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
@@ -130,6 +132,7 @@ export async function deleteDetalle(id: number, factura_id: number): Promise<Act
     }
 
     revalidatePath(`/detalles-factura?factura_id=${factura_id}`);
+    revalidatePath('/facturas');
     return { success: true, message: "Detalle eliminado con éxito." };
   } catch (error: unknown) {
     return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };

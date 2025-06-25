@@ -14,10 +14,14 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Printer } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { ArrowLeft, PlusCircle, Pencil, Trash2 } from "lucide-react";
 
 import type { FacturaCompra, FacturaDetalle, Producto } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
+import { deleteDetalle } from "@/app/detalles-factura/actions";
+import DetalleFacturaFormModal from "./detalle-factura-form-modal";
+import DeleteDetalleDialog from "./delete-detalle-dialog";
 
 interface DetallesFacturaClientProps {
     factura: FacturaCompra & { nombre_proveedor: string };
@@ -52,11 +56,45 @@ const getBadgeVariant = (estado: FacturaCompra['estado']) => {
 };
 
 export default function DetallesFacturaClient({ factura, initialDetalles, productos }: DetallesFacturaClientProps) {
+    const { toast } = useToast();
     const [detalles, setDetalles] = React.useState(initialDetalles);
+    
+    const [isModalOpen, setModalOpen] = React.useState(false);
+    const [editingDetalle, setEditingDetalle] = React.useState<FacturaDetalle | null>(null);
+    
+    const [isDeleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+    const [deletingDetalle, setDeletingDetalle] = React.useState<FacturaDetalle | null>(null);
 
     React.useEffect(() => {
         setDetalles(initialDetalles);
     }, [initialDetalles]);
+
+    const handleOpenAddModal = () => {
+        setEditingDetalle(null);
+        setModalOpen(true);
+    };
+
+    const handleOpenEditModal = (detalle: FacturaDetalle) => {
+        setEditingDetalle(detalle);
+        setModalOpen(true);
+    };
+
+    const handleOpenDeleteDialog = (detalle: FacturaDetalle) => {
+        setDeletingDetalle(detalle);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!deletingDetalle) return;
+        const result = await deleteDetalle(deletingDetalle.id, factura.id);
+        if (result.success) {
+            toast({ title: "Éxito", description: result.message });
+        } else {
+            toast({ title: "Error", description: result.message, variant: "destructive" });
+        }
+        setDeleteDialogOpen(false);
+        setDeletingDetalle(null);
+    };
 
     return (
         <>
@@ -68,11 +106,10 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                     </Link>
                 </Button>
                 <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-                    Vista Previa de Factura
+                    Gestionar Detalles de Factura
                 </h1>
                 <div className="ml-auto flex items-center gap-2">
-                    <Button size="sm" onClick={() => window.print()}>
-                        <Printer className="mr-2 h-4 w-4" />
+                     <Button size="sm" onClick={() => window.print()} variant="outline">
                         Imprimir
                     </Button>
                 </div>
@@ -131,8 +168,15 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
             </div>
 
             <Card>
-                <CardHeader>
-                    <CardTitle>Productos en la Factura</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>Productos en la Factura</CardTitle>
+                        <CardDescription>Añada, edite o elimine productos de esta factura.</CardDescription>
+                    </div>
+                    <Button size="sm" onClick={handleOpenAddModal}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Añadir Producto
+                    </Button>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -144,6 +188,7 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                                 <TableHead>Aplica IVA</TableHead>
                                 <TableHead className="text-right">Subtotal</TableHead>
                                 <TableHead className="text-right">Total</TableHead>
+                                <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -156,17 +201,42 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                                         <TableCell>{d.aplica_iva ? 'Sí' : 'No'}</TableCell>
                                         <TableCell className="text-right">${d.subtotal.toFixed(2)}</TableCell>
                                         <TableCell className="text-right font-medium">${d.total.toFixed(2)}</TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Button variant="ghost" size="icon" onClick={() => handleOpenEditModal(d)}>
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" onClick={() => handleOpenDeleteDialog(d)}>
+                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-24 text-center">No hay productos en esta factura.</TableCell>
+                                    <TableCell colSpan={7} className="h-24 text-center">No hay productos en esta factura.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
                     </Table>
                 </CardContent>
             </Card>
+
+            <DetalleFacturaFormModal 
+                isOpen={isModalOpen}
+                setIsOpen={setModalOpen}
+                detalle={editingDetalle}
+                facturaId={factura.id}
+                productos={productos}
+            />
+
+            <DeleteDetalleDialog
+                isOpen={isDeleteDialogOpen}
+                setIsOpen={setDeleteDialogOpen}
+                onConfirm={handleDeleteConfirm}
+                detalleInfo={deletingDetalle?.nombre_producto}
+            />
         </>
     );
 }

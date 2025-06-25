@@ -56,9 +56,6 @@ const getBadgeVariant = (estado: FacturaCompra['estado']) => {
         case 'Impresa': return 'default';
         case 'Registrada': return 'secondary';
         case 'Cancelada': return 'destructive';
-        case 'Pagada': return 'default';
-        case 'Pendiente': return 'secondary';
-        case 'Anulada': return 'destructive';
         default: return 'outline';
     }
 };
@@ -68,17 +65,13 @@ const getBadgeClassName = (estado: FacturaCompra['estado']) => {
         case 'Impresa': return 'bg-blue-100 text-blue-800';
         case 'Registrada': return 'bg-yellow-100 text-yellow-800';
         case 'Cancelada': return 'bg-red-100 text-red-800';
-        case 'Pagada': return 'bg-green-100 text-green-800';
-        case 'Pendiente': return 'bg-yellow-100 text-yellow-800';
-        case 'Anulada': return 'bg-red-100 text-red-800';
         default: return 'bg-gray-100 text-gray-800';
     }
 };
 
-export default function FacturasClient({ initialFacturas, initialProveedores, initialProductos }: FacturasClientProps) {
+export default function FacturasClient({ initialFacturas, initialProveedores }: FacturasClientProps) {
   const [data, setData] = React.useState<FacturaConNombre[]>(initialFacturas);
   const [proveedores] = React.useState<Proveedor[]>(initialProveedores);
-  const [productos] = React.useState<Producto[]>(initialProductos);
 
   const [filter, setFilter] = React.useState("");
   const [sortConfig, setSortConfig] = React.useState<{ key: SortKey; direction: "asc" | "desc" } | null>(null);
@@ -221,12 +214,12 @@ export default function FacturasClient({ initialFacturas, initialProveedores, in
                 paginatedData.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="flex items-center gap-1">
-                      <Button asChild variant="ghost" size="icon" title="Ver Detalles">
+                      <Button asChild variant="ghost" size="icon" title="Gestionar Detalles">
                          <Link href={`/detalles-factura?factura_id=${item.id}`}>
                            <Eye className="h-5 w-5 text-blue-600" />
                          </Link>
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleOpenEditModal(item)} title="Editar Factura">
+                      <Button variant="ghost" size="icon" onClick={() => handleOpenEditModal(item)} title="Editar Cabecera">
                         <Pencil className="h-5 w-5" />
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => handleOpenDeleteDialog(item)} title="Eliminar Factura">
@@ -237,7 +230,7 @@ export default function FacturasClient({ initialFacturas, initialProveedores, in
                     <TableCell>{item.nombre_proveedor}</TableCell>
                     <TableCell>{formatUTCDate(item.fecha_emision)}</TableCell>
                     <TableCell>{formatUTCDate(item.fecha_vencimiento)}</TableCell>
-                    <TableCell className="text-right">${(item.total || 0).toFixed(2)}</TableCell>
+                    <TableCell className="text-right">${item.total.toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge variant={getBadgeVariant(item.estado)} 
                              className={getBadgeClassName(item.estado)}>
@@ -284,7 +277,6 @@ export default function FacturasClient({ initialFacturas, initialProveedores, in
         setIsOpen={setModalOpen}
         factura={editingFactura}
         proveedores={proveedores}
-        productos={productos}
       />
       
       <DeleteFacturaDialog
