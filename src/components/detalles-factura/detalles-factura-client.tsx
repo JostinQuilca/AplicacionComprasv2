@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ArrowLeft, PlusCircle, Pencil, Trash2, Edit } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import type { FacturaCompra, FacturaDetalle, Producto, Proveedor } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
@@ -60,6 +61,7 @@ const getBadgeVariant = (estado: FacturaCompra['estado']) => {
 
 export default function DetallesFacturaClient({ factura, initialDetalles, productos, proveedores }: DetallesFacturaClientProps) {
     const { toast } = useToast();
+    const router = useRouter();
     const [detalles, setDetalles] = React.useState(initialDetalles);
     
     const [isDetalleModalOpen, setDetalleModalOpen] = React.useState(false);
@@ -73,6 +75,13 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
     React.useEffect(() => {
         setDetalles(initialDetalles);
     }, [initialDetalles]);
+
+    const financialSummary = React.useMemo(() => {
+        const subtotal = detalles.reduce((acc, d) => acc + d.subtotal, 0);
+        const iva = detalles.reduce((acc, d) => acc + d.iva, 0);
+        const total = subtotal + iva;
+        return { subtotal, iva, total };
+    }, [detalles]);
 
     const handleOpenAddModal = () => {
         setEditingDetalle(null);
@@ -94,6 +103,7 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
         const result = await deleteDetalle(deletingDetalle.id, factura.id);
         if (result.success) {
             toast({ title: "Éxito", description: result.message });
+            router.refresh();
         } else {
             toast({ title: "Error", description: result.message, variant: "destructive" });
         }
@@ -159,15 +169,15 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                      <CardContent className="grid gap-2 text-sm">
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Subtotal:</span>
-                            <span>${factura.subtotal.toFixed(2)}</span>
+                            <span>${financialSummary.subtotal.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">IVA (15%):</span>
-                            <span>${factura.iva.toFixed(2)}</span>
+                            <span>${financialSummary.iva.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between font-semibold text-base">
                             <span className="text-muted-foreground">Total:</span>
-                            <span>${factura.total.toFixed(2)}</span>
+                            <span>${financialSummary.total.toFixed(2)}</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -232,7 +242,10 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
             <FacturaFormModal
                 isOpen={isHeaderModalOpen}
                 setIsOpen={setHeaderModalOpen}
-                factura={factura}
+                factura={{
+                    ...factura,
+                    ...financialSummary
+                }}
                 proveedores={proveedores}
             />
 
