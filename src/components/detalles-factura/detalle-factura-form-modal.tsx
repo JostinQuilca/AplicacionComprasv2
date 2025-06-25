@@ -77,6 +77,7 @@ export default function DetalleFacturaFormModal({ isOpen, setIsOpen, detalle, fa
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (key === 'aplica_iva') {
+          // Only append 'on' if it's true, otherwise don't append
           if (value === true) formData.append(key, 'on');
       } else if (value !== null && value !== undefined) {
         formData.append(key, String(value));
@@ -109,7 +110,11 @@ export default function DetalleFacturaFormModal({ isOpen, setIsOpen, detalle, fa
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-md" onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent 
+        className="sm:max-w-md" 
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>{isEditMode ? "Editar Producto" : "Añadir Producto a Factura"}</DialogTitle>
            <DialogDescription>

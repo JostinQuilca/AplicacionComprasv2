@@ -115,7 +115,11 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-lg" onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent 
+        className="sm:max-w-lg" 
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>{isEditMode ? "Editar Encabezado de Factura" : "Añadir Nueva Factura"}</DialogTitle>
           <DialogDescription>
@@ -187,7 +191,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                           disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                           initialFocus
                           locale={es}
-                          formatters={{ formatWeekdayName: (day) => format(day, 'cccccc', { locale: es }).charAt(0) }}
+                          formatters={{ formatWeekdayName: (day) => format(day, 'cccccc', { locale: es }).charAt(0).toUpperCase() }}
                         />
                       </PopoverContent>
                     </Popover>
@@ -224,7 +228,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                           disabled={{ before: fechaEmision }}
                           initialFocus
                           locale={es}
-                          formatters={{ formatWeekdayName: (day) => format(day, 'cccccc', { locale: es }).charAt(0) }}
+                          formatters={{ formatWeekdayName: (day) => format(day, 'cccccc', { locale: es }).charAt(0).toUpperCase() }}
                         />
                       </PopoverContent>
                     </Popover>
