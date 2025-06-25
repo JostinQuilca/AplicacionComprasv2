@@ -115,7 +115,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>{isEditMode ? "Editar Encabezado de Factura" : "Añadir Nueva Factura"}</DialogTitle>
           <DialogDescription>
