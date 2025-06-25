@@ -115,11 +115,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent 
-        className="sm:max-w-lg" 
-        onOpenAutoFocus={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{isEditMode ? "Editar Encabezado de Factura" : "Añadir Nueva Factura"}</DialogTitle>
           <DialogDescription>
@@ -168,7 +164,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Fecha de Emisión</FormLabel>
-                    <Popover>
+                    <Popover modal={true}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -205,7 +201,7 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Fecha de Vencimiento</FormLabel>
-                    <Popover>
+                    <Popover modal={true}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button

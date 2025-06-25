@@ -110,11 +110,7 @@ export default function DetalleFacturaFormModal({ isOpen, setIsOpen, detalle, fa
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent 
-        className="sm:max-w-md" 
-        onOpenAutoFocus={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{isEditMode ? "Editar Producto" : "Añadir Producto a Factura"}</DialogTitle>
            <DialogDescription>
