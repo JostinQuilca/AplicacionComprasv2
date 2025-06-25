@@ -144,6 +144,9 @@ export async function cancelFactura(id: number): Promise<ActionResponse> {
 
   const validatedFields = FacturaCompraSchema.safeParse({
      ...currentFactura,
+     subtotal: parseFloat(currentFactura.subtotal) || 0,
+     iva: parseFloat(currentFactura.iva) || 0,
+     total: parseFloat(currentFactura.total) || 0,
      fecha_emision: new Date(currentFactura.fecha_emision),
      fecha_vencimiento: currentFactura.fecha_vencimiento ? new Date(currentFactura.fecha_vencimiento) : null,
      estado: "Cancelada"
