@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { ProveedorSchema } from "@/lib/types";
 import { formatZodErrors, handleApiError, type ActionResponse } from "@/lib/actions-utils";
 
-const API_URL = "https://modulocompras-production-843f.up.railway.app/api/proveedores";
+const API_URL = "https://modulocompras.onrender.com/api/proveedores";
 
 export async function addProveedor(
   prevState: any,

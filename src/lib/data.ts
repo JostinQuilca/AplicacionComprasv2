@@ -1,6 +1,6 @@
 import type { FacturaCompra, FacturaDetalle, Producto, Proveedor } from '@/lib/types';
 
-const API_BASE_URL_COMPRAS = "https://modulocompras-production-843f.up.railway.app/api";
+const API_BASE_URL_COMPRAS = "https://modulocompras.onrender.com/api";
 const API_BASE_URL_AD = "https://adapi-production-16e6.up.railway.app/api/v1";
 
 async function fetchData<T>(url: string, defaultReturnValue: T): Promise<T> {

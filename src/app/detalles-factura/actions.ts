@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { FacturaDetalleSchema } from "@/lib/types";
 import { formatZodErrors, handleApiError, type ActionResponse } from "@/lib/actions-utils";
 
-const API_URL = "https://modulocompras-production-843f.up.railway.app/api/detalles-factura";
+const API_URL = "https://modulocompras.onrender.com/api/detalles-factura";
 const IVA_RATE = 0.15;
 
 export async function addDetalle(

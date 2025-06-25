@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { formatZodErrors, handleApiError, type ActionResponse } from "@/lib/actions-utils";
 import { getDetalles, getProductos } from "@/lib/data";
 
-const API_URL = "https://modulocompras-production-843f.up.railway.app/api/facturas";
+const API_URL = "https://modulocompras.onrender.com/api/facturas";
 
 export async function addFactura(
   prevState: any,
