@@ -2,10 +2,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { FacturaCompra, FacturaCompraSchema, FacturaDetalle, Producto } from "@/lib/types";
+import { FacturaCompra, FacturaCompraSchema } from "@/lib/types";
 import { format } from 'date-fns';
 import { formatZodErrors, handleApiError, type ActionResponse } from "@/lib/actions-utils";
-import { getDetalles, getProductos } from "@/lib/data";
 
 const API_URL = "https://modulocompras.onrender.com/api/facturas";
 
@@ -120,6 +119,7 @@ export async function updateFactura(
     
     revalidatePath("/facturas");
     revalidatePath(`/detalles-factura?factura_id=${id}`);
+    revalidatePath(`/facturas/vista?factura_id=${id}`);
     return { 
         success: true, 
         message: "Factura actualizada con éxito.",
@@ -130,34 +130,60 @@ export async function updateFactura(
   }
 }
 
-export async function deleteFactura(id: number): Promise<ActionResponse> {
+export async function cancelFactura(id: number): Promise<ActionResponse> {
+  let currentFactura;
+  try {
+    const res = await fetch(`${API_URL}/${id}`);
+    if (!res.ok) {
+      await handleApiError(res, 'Error al obtener los datos de la factura para cancelar.');
+    }
+    currentFactura = await res.json();
+  } catch (error) {
+    return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error al buscar la factura." };
+  }
+
+  const validatedFields = FacturaCompraSchema.safeParse({
+     ...currentFactura,
+     fecha_emision: new Date(currentFactura.fecha_emision),
+     fecha_vencimiento: currentFactura.fecha_vencimiento ? new Date(currentFactura.fecha_vencimiento) : null,
+     estado: "Cancelada"
+   });
+ 
+   if (!validatedFields.success) {
+      return {
+       success: false,
+       message: "Los datos de la factura existente son inválidos. " + formatZodErrors(validatedFields.error),
+     };
+   }
+
+   const finalDataToSubmit = {
+       ...validatedFields.data,
+       fecha_emision: format(validatedFields.data.fecha_emision, "yyyy-MM-dd"),
+       fecha_vencimiento: validatedFields.data.fecha_vencimiento
+         ? format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd")
+         : null,
+       usuario_modificacion: 1,
+   };
+
   try {
     const response = await fetch(`${API_URL}/${id}`, {
-      method: "DELETE",
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(finalDataToSubmit),
     });
 
     if (!response.ok) {
-      await handleApiError(response, 'Error al eliminar la factura.');
+      await handleApiError(response, 'Error al cancelar la factura.');
     }
-
+    
     revalidatePath("/facturas");
-    return { success: true, message: "Factura eliminada con éxito." };
+    revalidatePath(`/detalles-factura?factura_id=${id}`);
+    revalidatePath(`/facturas/vista?factura_id=${id}`);
+    return { 
+        success: true, 
+        message: "Factura cancelada con éxito.",
+    };
   } catch (error: unknown) {
-    return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
+     return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
   }
-}
-
-export async function getDetallesByFacturaId(facturaId: number): Promise<FacturaDetalle[]> {
-    const [allDetalles, allProductos] = await Promise.all([getDetalles(), getProductos()]);
-    
-    const productoMap = new Map(allProductos.map(p => [p.id_producto, p.nombre]));
-    
-    const facturaDetalles = allDetalles.filter(d => d.factura_id === facturaId);
-
-    const detallesConNombres = facturaDetalles.map(detalle => ({
-      ...detalle,
-      nombre_producto: productoMap.get(detalle.producto_id) || 'Producto no encontrado'
-    }));
-
-    return detallesConNombres;
 }

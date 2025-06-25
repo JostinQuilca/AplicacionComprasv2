@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -15,18 +16,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowLeft, PlusCircle, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, PlusCircle, Pencil, Trash2, Edit } from "lucide-react";
 
-import type { FacturaCompra, FacturaDetalle, Producto } from "@/lib/types";
+import type { FacturaCompra, FacturaDetalle, Producto, Proveedor } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { deleteDetalle } from "@/app/detalles-factura/actions";
 import DetalleFacturaFormModal from "./detalle-factura-form-modal";
 import DeleteDetalleDialog from "./delete-detalle-dialog";
+import FacturaFormModal from "../facturas/factura-form-modal";
 
 interface DetallesFacturaClientProps {
     factura: FacturaCompra & { nombre_proveedor: string };
     initialDetalles: FacturaDetalle[];
     productos: Producto[];
+    proveedores: Proveedor[];
 }
 
 const formatUTCDate = (dateString: string | null | undefined) => {
@@ -55,15 +58,17 @@ const getBadgeVariant = (estado: FacturaCompra['estado']) => {
     }
 };
 
-export default function DetallesFacturaClient({ factura, initialDetalles, productos }: DetallesFacturaClientProps) {
+export default function DetallesFacturaClient({ factura, initialDetalles, productos, proveedores }: DetallesFacturaClientProps) {
     const { toast } = useToast();
     const [detalles, setDetalles] = React.useState(initialDetalles);
     
-    const [isModalOpen, setModalOpen] = React.useState(false);
+    const [isDetalleModalOpen, setDetalleModalOpen] = React.useState(false);
     const [editingDetalle, setEditingDetalle] = React.useState<FacturaDetalle | null>(null);
     
     const [isDeleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
     const [deletingDetalle, setDeletingDetalle] = React.useState<FacturaDetalle | null>(null);
+
+    const [isHeaderModalOpen, setHeaderModalOpen] = React.useState(false);
 
     React.useEffect(() => {
         setDetalles(initialDetalles);
@@ -71,12 +76,12 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
 
     const handleOpenAddModal = () => {
         setEditingDetalle(null);
-        setModalOpen(true);
+        setDetalleModalOpen(true);
     };
 
     const handleOpenEditModal = (detalle: FacturaDetalle) => {
         setEditingDetalle(detalle);
-        setModalOpen(true);
+        setDetalleModalOpen(true);
     };
 
     const handleOpenDeleteDialog = (detalle: FacturaDetalle) => {
@@ -96,6 +101,8 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
         setDeletingDetalle(null);
     };
 
+    const isFacturaCancelada = factura.estado === 'Cancelada';
+
     return (
         <>
             <div className="flex items-center gap-4">
@@ -108,16 +115,15 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                 <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
                     Gestionar Detalles de Factura
                 </h1>
-                <div className="ml-auto flex items-center gap-2">
-                     <Button size="sm" onClick={() => window.print()} variant="outline">
-                        Imprimir
-                    </Button>
-                </div>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                  <Card>
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-start justify-between">
                         <CardTitle>Información de la Factura</CardTitle>
+                        <Button variant="outline" size="sm" onClick={() => setHeaderModalOpen(true)} disabled={isFacturaCancelada}>
+                            <Edit className="mr-2 h-4 w-4"/>
+                            Editar Cabecera
+                        </Button>
                     </CardHeader>
                     <CardContent className="grid gap-2 text-sm">
                         <div className="flex justify-between">
@@ -173,7 +179,7 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                         <CardTitle>Productos en la Factura</CardTitle>
                         <CardDescription>Añada, edite o elimine productos de esta factura.</CardDescription>
                     </div>
-                    <Button size="sm" onClick={handleOpenAddModal}>
+                    <Button size="sm" onClick={handleOpenAddModal} disabled={isFacturaCancelada}>
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Añadir Producto
                     </Button>
@@ -203,10 +209,10 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                                         <TableCell className="text-right font-medium">${d.total.toFixed(2)}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-2">
-                                                <Button variant="ghost" size="icon" onClick={() => handleOpenEditModal(d)}>
+                                                <Button variant="ghost" size="icon" onClick={() => handleOpenEditModal(d)} disabled={isFacturaCancelada}>
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" onClick={() => handleOpenDeleteDialog(d)}>
+                                                <Button variant="ghost" size="icon" onClick={() => handleOpenDeleteDialog(d)} disabled={isFacturaCancelada}>
                                                     <Trash2 className="h-4 w-4 text-destructive" />
                                                 </Button>
                                             </div>
@@ -223,9 +229,16 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                 </CardContent>
             </Card>
 
+            <FacturaFormModal
+                isOpen={isHeaderModalOpen}
+                setIsOpen={setHeaderModalOpen}
+                factura={factura}
+                proveedores={proveedores}
+            />
+
             <DetalleFacturaFormModal 
-                isOpen={isModalOpen}
-                setIsOpen={setModalOpen}
+                isOpen={isDetalleModalOpen}
+                setIsOpen={setDetalleModalOpen}
                 detalle={editingDetalle}
                 facturaId={factura.id}
                 productos={productos}

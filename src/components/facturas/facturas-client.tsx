@@ -19,14 +19,14 @@ import {
   Filter,
   Pencil,
   PlusCircle,
-  Trash2,
+  Ban,
   Eye,
 } from "lucide-react";
 import type { FacturaCompra, Proveedor, Producto } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import FacturaFormModal from "./factura-form-modal";
-import DeleteFacturaDialog from "./delete-factura-dialog";
-import { deleteFactura } from "@/app/facturas/actions";
+import CancelFacturaDialog from "./cancel-factura-dialog";
+import { cancelFactura } from "@/app/facturas/actions";
 import { Card } from "../ui/card";
 import { format, parseISO } from "date-fns";
 
@@ -79,8 +79,8 @@ export default function FacturasClient({ initialFacturas, initialProveedores }: 
   const [isModalOpen, setModalOpen] = React.useState(false);
   const [editingFactura, setEditingFactura] = React.useState<FacturaConNombre | null>(null);
 
-  const [isDeleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-  const [deletingFactura, setDeletingFactura] = React.useState<FacturaConNombre | null>(null);
+  const [isCancelDialogOpen, setCancelDialogOpen] = React.useState(false);
+  const [cancelingFactura, setCancelingFactura] = React.useState<FacturaConNombre | null>(null);
   
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 10;
@@ -145,28 +145,22 @@ export default function FacturasClient({ initialFacturas, initialProveedores }: 
     setModalOpen(true);
   };
   
-  const handleOpenEditModal = (factura: FacturaConNombre) => {
-    setEditingFactura(factura);
-    setModalOpen(true);
-  };
-  
-  const handleOpenDeleteDialog = (factura: FacturaConNombre) => {
-    setDeletingFactura(factura);
-    setDeleteDialogOpen(true);
+  const handleOpenCancelDialog = (factura: FacturaConNombre) => {
+    setCancelingFactura(factura);
+    setCancelDialogOpen(true);
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!deletingFactura) return;
+  const handleCancelConfirm = async () => {
+    if (!cancelingFactura) return;
     
-    const result = await deleteFactura(deletingFactura.id);
+    const result = await cancelFactura(cancelingFactura.id);
     if(result.success) {
       toast({ title: "Éxito", description: result.message });
-      // Revalidation will be handled by the server action
     } else {
       toast({ title: "Error", description: result.message, variant: "destructive" });
     }
-    setDeleteDialogOpen(false);
-    setDeletingFactura(null);
+    setCancelDialogOpen(false);
+    setCancelingFactura(null);
   };
 
   return (
@@ -214,16 +208,24 @@ export default function FacturasClient({ initialFacturas, initialProveedores }: 
                 paginatedData.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="flex items-center gap-1">
-                      <Button asChild variant="ghost" size="icon" title="Gestionar Detalles">
-                         <Link href={`/detalles-factura?factura_id=${item.id}`}>
+                      <Button asChild variant="ghost" size="icon" title="Ver Factura">
+                         <Link href={`/facturas/vista?factura_id=${item.id}`}>
                            <Eye className="h-5 w-5 text-blue-600" />
                          </Link>
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleOpenEditModal(item)} title="Editar Cabecera">
-                        <Pencil className="h-5 w-5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleOpenDeleteDialog(item)} title="Eliminar Factura">
-                        <Trash2 className="h-5 w-5 text-destructive" />
+                      {item.estado === 'Cancelada' ? (
+                          <Button variant="ghost" size="icon" title="Editar Factura" disabled>
+                              <Pencil className="h-5 w-5" />
+                          </Button>
+                      ) : (
+                          <Button asChild variant="ghost" size="icon" title="Editar Factura">
+                              <Link href={`/detalles-factura?factura_id=${item.id}`}>
+                                  <Pencil className="h-5 w-5" />
+                              </Link>
+                          </Button>
+                      )}
+                      <Button variant="ghost" size="icon" onClick={() => handleOpenCancelDialog(item)} title="Cancelar Factura" disabled={item.estado === 'Cancelada'}>
+                        <Ban className="h-5 w-5 text-destructive" />
                       </Button>
                     </TableCell>
                     <TableCell className="font-medium">{item.numero_factura_proveedor}</TableCell>
@@ -279,11 +281,11 @@ export default function FacturasClient({ initialFacturas, initialProveedores }: 
         proveedores={proveedores}
       />
       
-      <DeleteFacturaDialog
-        isOpen={isDeleteDialogOpen}
-        setIsOpen={setDeleteDialogOpen}
-        onConfirm={handleDeleteConfirm}
-        facturaNumero={deletingFactura?.numero_factura_proveedor}
+      <CancelFacturaDialog
+        isOpen={isCancelDialogOpen}
+        setIsOpen={setCancelDialogOpen}
+        onConfirm={handleCancelConfirm}
+        facturaNumero={cancelingFactura?.numero_factura_proveedor}
       />
     </>
   );

@@ -1,5 +1,5 @@
 import DetallesFacturaClient from '@/components/detalles-factura/detalles-factura-client';
-import { getFactura, getDetalles, getProductos } from '@/lib/data';
+import { getFactura, getDetalles, getProductos, getProveedores } from '@/lib/data';
 import { notFound } from 'next/navigation';
 
 export default async function DetallesFacturaPage({ searchParams }: { searchParams: { factura_id?: string } }) {
@@ -9,10 +9,11 @@ export default async function DetallesFacturaPage({ searchParams }: { searchPara
     return notFound();
   }
 
-  const [factura, todosLosDetalles, productos] = await Promise.all([
+  const [factura, todosLosDetalles, productos, proveedores] = await Promise.all([
     getFactura(facturaId),
     getDetalles(),
-    getProductos()
+    getProductos(),
+    getProveedores()
   ]);
 
   if (!factura) {
@@ -33,6 +34,7 @@ export default async function DetallesFacturaPage({ searchParams }: { searchPara
         factura={factura} 
         initialDetalles={detallesConNombres} 
         productos={productos}
+        proveedores={proveedores}
       />
     </main>
   );

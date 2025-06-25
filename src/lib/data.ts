@@ -95,3 +95,18 @@ export async function getFactura(id: number): Promise<(FacturaCompra & {nombre_p
         total: parseFloat(factura.total) || 0,
     };
 }
+
+export async function getDetallesByFacturaId(facturaId: number): Promise<FacturaDetalle[]> {
+    const [allDetalles, allProductos] = await Promise.all([getDetalles(), getProductos()]);
+    
+    const productoMap = new Map(allProductos.map(p => [p.id_producto, p.nombre]));
+    
+    const facturaDetalles = allDetalles.filter(d => d.factura_id === facturaId);
+
+    const detallesConNombres = facturaDetalles.map(detalle => ({
+      ...detalle,
+      nombre_producto: productoMap.get(detalle.producto_id) || 'Producto no encontrado'
+    }));
+
+    return detallesConNombres;
+}
