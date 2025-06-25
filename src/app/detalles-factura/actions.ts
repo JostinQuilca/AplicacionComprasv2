@@ -2,11 +2,77 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { FacturaDetalleSchema } from "@/lib/types";
+import { format } from 'date-fns';
+import { FacturaCompraSchema, FacturaDetalleSchema } from "@/lib/types";
 import { formatZodErrors, handleApiError, type ActionResponse } from "@/lib/actions-utils";
+import { getDetallesByFacturaId } from "@/lib/data";
 
 const API_URL = "https://modulocompras.onrender.com/api/detalles-factura";
+const FACTURAS_API_URL = "https://modulocompras.onrender.com/api/facturas";
 const IVA_RATE = 0.15;
+
+/**
+ * Recalcula y actualiza los totales (subtotal, iva, total) de una factura
+ * basándose en sus detalles actuales.
+ * @param facturaId El ID de la factura a actualizar.
+ */
+async function updateFacturaTotals(facturaId: number) {
+  try {
+    // 1. Obtener todos los detalles para la factura
+    const detalles = await getDetallesByFacturaId(facturaId);
+
+    // 2. Calcular los nuevos totales
+    const subtotal = detalles.reduce((acc, d) => acc + d.subtotal, 0);
+    const iva = detalles.reduce((acc, d) => acc + d.iva, 0);
+    const total = subtotal + iva;
+
+    // 3. Obtener el objeto de factura actual completo
+    const facturaRes = await fetch(`${FACTURAS_API_URL}/${facturaId}`);
+    if (!facturaRes.ok) {
+      await handleApiError(facturaRes, `No se pudo obtener la factura ${facturaId} para actualizar totales.`);
+    }
+    const currentFactura = await facturaRes.json();
+
+    // 4. Validar y formatear los datos para la solicitud PUT
+    const validatedFields = FacturaCompraSchema.safeParse({
+       ...currentFactura,
+       subtotal,
+       iva,
+       total,
+       fecha_emision: new Date(currentFactura.fecha_emision),
+       fecha_vencimiento: currentFactura.fecha_vencimiento ? new Date(currentFactura.fecha_vencimiento) : null,
+     });
+ 
+     if (!validatedFields.success) {
+        console.error("Error de validación de Zod al actualizar totales:", validatedFields.error);
+        throw new Error("Datos de factura inválidos al recalcular totales. " + formatZodErrors(validatedFields.error));
+     }
+
+     const dataToSubmit = {
+         ...validatedFields.data,
+         fecha_emision: format(validatedFields.data.fecha_emision, "yyyy-MM-dd"),
+         fecha_vencimiento: validatedFields.data.fecha_vencimiento
+           ? format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd")
+           : null,
+         usuario_modificacion: 1, // Mock user ID
+     };
+    
+    // 5. Realizar la solicitud PUT para actualizar la factura
+    const response = await fetch(`${FACTURAS_API_URL}/${facturaId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataToSubmit),
+    });
+
+    if (!response.ok) {
+        await handleApiError(response, 'Error al actualizar los totales de la factura.');
+    }
+  } catch (error) {
+    console.error("Fallo al actualizar totales de factura:", error);
+    // No lanzamos el error para no interrumpir el flujo principal, pero lo registramos.
+    // La revalidación al final de las acciones principales podría solucionar inconsistencias.
+  }
+}
 
 export async function addDetalle(
   prevState: any,
@@ -55,6 +121,8 @@ export async function addDetalle(
     if (!response.ok) {
        await handleApiError(response, 'Error al crear el detalle.');
     }
+
+    await updateFacturaTotals(dataToSubmit.factura_id);
 
     revalidatePath(`/detalles-factura?factura_id=${dataToSubmit.factura_id}`);
     revalidatePath('/facturas');
@@ -113,6 +181,8 @@ export async function updateDetalle(
       await handleApiError(response, 'Error al actualizar el detalle.');
     }
     
+    await updateFacturaTotals(dataToSubmit.factura_id);
+
     revalidatePath(`/detalles-factura?factura_id=${dataToSubmit.factura_id}`);
     revalidatePath('/facturas');
     return { success: true, message: "Detalle actualizado con éxito." };
@@ -130,6 +200,8 @@ export async function deleteDetalle(id: number, factura_id: number): Promise<Act
     if (!response.ok) {
       await handleApiError(response, 'Error al eliminar el detalle.');
     }
+
+    await updateFacturaTotals(factura_id);
 
     revalidatePath(`/detalles-factura?factura_id=${factura_id}`);
     revalidatePath('/facturas');
