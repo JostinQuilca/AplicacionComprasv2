@@ -158,43 +158,57 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
               )}
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="fecha_emision"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Fecha de Emisión</FormLabel>
-                    <Popover modal={true}>
-                      <PopoverTrigger asChild>
+               {isEditMode ? (
+                  <FormField
+                    control={form.control}
+                    name="fecha_emision"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Fecha de Emisión</FormLabel>
+                        <Popover modal={true}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "pl-3 text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? format(field.value, "PPP", { locale: es }) : <span>Elija una fecha</span>}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value as Date}
+                              onSelect={field.onChange}
+                              disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                              initialFocus
+                              locale={es}
+                              formatters={{ formatWeekdayName: (day) => format(day, 'cccccc', { locale: es }).charAt(0).toUpperCase() }}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                    <FormItem>
+                        <FormLabel>Fecha de Emisión</FormLabel>
                         <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? format(field.value, "PPP", { locale: es }) : <span>Elija una fecha</span>}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value as Date}
-                          onSelect={field.onChange}
-                          disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                          initialFocus
-                          locale={es}
-                          formatters={{ formatWeekdayName: (day) => format(day, 'cccccc', { locale: es }).charAt(0).toUpperCase() }}
+                        <Input
+                            value={format(new Date(), "PPP", { locale: es })}
+                            disabled
+                            className="cursor-default"
                         />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
                 )}
-              />
               <FormField
                 control={form.control}
                 name="fecha_vencimiento"
