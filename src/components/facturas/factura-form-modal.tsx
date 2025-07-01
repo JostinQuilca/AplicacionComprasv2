@@ -269,28 +269,42 @@ export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedor
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="estado"
-                render={({ field }) => (
-                  <FormItem>
+              {isEditMode ? (
+                <FormField
+                  control={form.control}
+                  name="estado"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccione un estado" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Registrada">Registrada</SelectItem>
+                          <SelectItem value="Impresa">Impresa</SelectItem>
+                          <SelectItem value="Cancelada">Cancelada</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (
+                 <FormItem>
                     <FormLabel>Estado</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccione un estado" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Registrada">Registrada</SelectItem>
-                        <SelectItem value="Impresa">Impresa</SelectItem>
-                        <SelectItem value="Cancelada">Cancelada</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                    <Input
+                        value="Registrada"
+                        disabled
+                        className="cursor-default"
+                    />
+                    </FormControl>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                </FormItem>
+              )}
             </div>
           </form>
         </Form>
