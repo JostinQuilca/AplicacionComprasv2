@@ -1,7 +1,7 @@
 import type { FacturaCompra, FacturaDetalle, Producto, Proveedor } from '@/lib/types';
 
 const API_BASE_URL_COMPRAS = "https://modulocompras.onrender.com/api";
-const API_BASE_URL_AD = "https://adapi-production-16e6.up.railway.app/api/v1";
+const API_BASE_URL_AD = "https://ad-xglt.onrender.com/api/v1";
 
 async function fetchData<T>(url: string, defaultReturnValue: T): Promise<T> {
     try {
@@ -49,11 +49,30 @@ export async function getFacturas(): Promise<FacturaCompra[]> {
 }
 
 export async function getProductos(): Promise<Producto[]> {
-    const data = await fetchData<any>(`${API_BASE_URL_AD}/productos/`, []);
-    // API could return { data: [...] } or just [...]
-    if (Array.isArray(data)) return data;
-    if (data && Array.isArray(data.data)) return data.data;
+  // Fetch from the new URL structure
+  const data = await fetchData<any>(`${API_BASE_URL_AD}/productos`, []);
+  let productos: any[] = [];
+
+  // Adapt to the new response structure which might be { "productos": [...] }
+  if (data && Array.isArray(data.productos)) {
+    productos = data.productos;
+  }
+  // Handle if the response is a direct array
+  else if (Array.isArray(data)) {
+    productos = data;
+  }
+  // If the structure is unexpected, return an empty array
+  else {
     return [];
+  }
+
+  // Map the response to match the Producto type, handling the 'pvp' field
+  return productos.map((p) => ({
+    ...p,
+    precio_unitario: String(p.pvp ?? p.precio_unitario ?? "0.00"),
+    descripcion: p.descripcion ?? null,
+    id_categoria: p.id_categoria ?? 0,
+  }));
 }
 
 export async function getDetalles(): Promise<FacturaDetalle[]> {
