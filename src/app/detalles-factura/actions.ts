@@ -69,8 +69,12 @@ async function updateFacturaTotals(facturaId: number) {
     }
   } catch (error) {
     console.error("Fallo al actualizar totales de factura:", error);
-    // No lanzamos el error para no interrumpir el flujo principal, pero lo registramos.
-    // La revalidación al final de las acciones principales podría solucionar inconsistencias.
+    // Propagar el error para que la acción principal pueda manejarlo y notificar al usuario.
+    // Esto evita fallos silenciosos donde el total no se actualiza pero el usuario no recibe feedback.
+    if (error instanceof Error) {
+        throw new Error(`Fallo al actualizar totales de factura: ${error.message}`);
+    }
+    throw new Error('Un error desconocido ocurrió al actualizar los totales de la factura.');
   }
 }
 
