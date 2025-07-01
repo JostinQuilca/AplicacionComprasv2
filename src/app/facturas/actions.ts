@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { FacturaCompra, FacturaCompraSchema } from "@/lib/types";
 import { format } from 'date-fns';
 import { formatZodErrors, handleApiError, type ActionResponse } from "@/lib/actions-utils";
+import { getFacturas } from "@/lib/data";
 
 const API_URL = "https://modulocompras.onrender.com/api/facturas";
 
@@ -34,6 +35,24 @@ export async function addFactura(
     };
   }
   
+  // Check for duplicate invoice number for the same provider
+  const { proveedor_cedula_ruc, numero_factura_proveedor } = validatedFields.data;
+  try {
+    const allFacturas = await getFacturas();
+    const existingFactura = allFacturas.find(
+      f => f.proveedor_cedula_ruc === proveedor_cedula_ruc && f.numero_factura_proveedor === numero_factura_proveedor
+    );
+
+    if (existingFactura) {
+      return {
+        success: false,
+        message: `Ya existe una factura con el número "${numero_factura_proveedor}" para este proveedor.`,
+      };
+    }
+  } catch (error) {
+     return { success: false, message: "Error al verificar facturas existentes." };
+  }
+
   const dataToSubmit = {
       ...validatedFields.data,
       numero_factura: `TEMP-${Date.now()}`,
@@ -94,6 +113,27 @@ export async function updateFactura(
       message: formatZodErrors(validatedFields.error),
     };
   }
+
+  // Check for duplicate invoice number for the same provider, excluding the current invoice
+  const { proveedor_cedula_ruc, numero_factura_proveedor } = validatedFields.data;
+  try {
+      const allFacturas = await getFacturas();
+      const existingFactura = allFacturas.find(
+        f => f.id !== id &&
+             f.proveedor_cedula_ruc === proveedor_cedula_ruc && 
+             f.numero_factura_proveedor === numero_factura_proveedor
+      );
+
+      if (existingFactura) {
+        return {
+          success: false,
+          message: `Ya existe otra factura con el número "${numero_factura_proveedor}" para este proveedor.`,
+        };
+      }
+  } catch (error) {
+     return { success: false, message: "Error al verificar facturas existentes." };
+  }
+
 
   const dataToSubmit = {
       ...validatedFields.data,
