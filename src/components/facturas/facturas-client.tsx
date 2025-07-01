@@ -205,42 +205,39 @@ export default function FacturasClient({ initialFacturas, initialProveedores }: 
             </TableHeader>
             <TableBody>
               {paginatedData.length > 0 ? (
-                paginatedData.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="flex items-center gap-1">
-                      <Button asChild variant="ghost" size="icon" title="Ver Factura">
-                         <Link href={`/facturas/vista?factura_id=${item.id}`}>
-                           <Eye className="h-5 w-5 text-blue-600" />
-                         </Link>
-                      </Button>
-                      {item.estado === 'Cancelada' ? (
-                          <Button variant="ghost" size="icon" title="Editar Factura" disabled>
-                              <Pencil className="h-5 w-5" />
-                          </Button>
-                      ) : (
-                          <Button asChild variant="ghost" size="icon" title="Editar Factura">
-                              <Link href={`/detalles-factura?factura_id=${item.id}`}>
-                                  <Pencil className="h-5 w-5" />
-                              </Link>
-                          </Button>
-                      )}
-                      <Button variant="ghost" size="icon" onClick={() => handleOpenCancelDialog(item)} title="Cancelar Factura" disabled={item.estado === 'Cancelada'}>
-                        <Ban className="h-5 w-5 text-destructive" />
-                      </Button>
-                    </TableCell>
-                    <TableCell className="font-medium">{item.numero_factura_proveedor}</TableCell>
-                    <TableCell>{item.nombre_proveedor}</TableCell>
-                    <TableCell>{formatUTCDate(item.fecha_emision)}</TableCell>
-                    <TableCell>{formatUTCDate(item.fecha_vencimiento)}</TableCell>
-                    <TableCell className="text-right">${item.total.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <Badge variant={getBadgeVariant(item.estado)} 
-                             className={getBadgeClassName(item.estado)}>
-                        {item.estado}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))
+                paginatedData.map((item) => {
+                  const isModificationDisabled = item.estado === 'Impresa' || item.estado === 'Cancelada';
+                  return (
+                    <TableRow key={item.id}>
+                      <TableCell className="flex items-center gap-1">
+                        <Button asChild variant="ghost" size="icon" title="Ver Factura">
+                           <Link href={`/facturas/vista?factura_id=${item.id}`}>
+                             <Eye className="h-5 w-5 text-blue-600" />
+                           </Link>
+                        </Button>
+                        <Button asChild variant="ghost" size="icon" title="Editar Factura" disabled={isModificationDisabled}>
+                            <Link href={`/detalles-factura?factura_id=${item.id}`}>
+                                <Pencil className="h-5 w-5" />
+                            </Link>
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleOpenCancelDialog(item)} title="Cancelar Factura" disabled={isModificationDisabled}>
+                          <Ban className="h-5 w-5 text-destructive" />
+                        </Button>
+                      </TableCell>
+                      <TableCell className="font-medium">{item.numero_factura_proveedor}</TableCell>
+                      <TableCell>{item.nombre_proveedor}</TableCell>
+                      <TableCell>{formatUTCDate(item.fecha_emision)}</TableCell>
+                      <TableCell>{formatUTCDate(item.fecha_vencimiento)}</TableCell>
+                      <TableCell className="text-right">${item.total.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <Badge variant={getBadgeVariant(item.estado)} 
+                               className={getBadgeClassName(item.estado)}>
+                          {item.estado}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
               ) : (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center h-24">

@@ -190,3 +190,64 @@ export async function cancelFactura(id: number): Promise<ActionResponse> {
      return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
   }
 }
+
+export async function printFactura(id: number): Promise<ActionResponse> {
+  let currentFactura;
+  try {
+    const res = await fetch(`${API_URL}/${id}`);
+    if (!res.ok) {
+      await handleApiError(res, 'Error al obtener los datos de la factura para imprimir.');
+    }
+    currentFactura = await res.json();
+  } catch (error) {
+    return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error al buscar la factura." };
+  }
+
+  const validatedFields = FacturaCompraSchema.safeParse({
+     ...currentFactura,
+     subtotal: parseFloat(currentFactura.subtotal) || 0,
+     iva: parseFloat(currentFactura.iva) || 0,
+     total: parseFloat(currentFactura.total) || 0,
+     fecha_emision: new Date(currentFactura.fecha_emision),
+     fecha_vencimiento: currentFactura.fecha_vencimiento ? new Date(currentFactura.fecha_vencimiento) : null,
+     estado: "Impresa"
+   });
+ 
+   if (!validatedFields.success) {
+      return {
+       success: false,
+       message: "Los datos de la factura existente son inválidos. " + formatZodErrors(validatedFields.error),
+     };
+   }
+
+   const finalDataToSubmit = {
+       ...validatedFields.data,
+       fecha_emision: format(validatedFields.data.fecha_emision, "yyyy-MM-dd"),
+       fecha_vencimiento: validatedFields.data.fecha_vencimiento
+         ? format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd")
+         : null,
+       usuario_modificacion: 1,
+   };
+
+  try {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(finalDataToSubmit),
+    });
+
+    if (!response.ok) {
+      await handleApiError(response, 'Error al cambiar el estado de la factura a Impresa.');
+    }
+    
+    revalidatePath("/facturas");
+    revalidatePath(`/detalles-factura?factura_id=${id}`);
+    revalidatePath(`/facturas/vista?factura_id=${id}`);
+    return { 
+        success: true, 
+        message: "Factura marcada como Impresa.",
+    };
+  } catch (error: unknown) {
+     return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
+  }
+}

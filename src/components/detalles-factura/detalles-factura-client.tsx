@@ -111,7 +111,7 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
         setDeletingDetalle(null);
     };
 
-    const isFacturaCancelada = factura.estado === 'Cancelada';
+    const isModificationDisabled = factura.estado === 'Impresa' || factura.estado === 'Cancelada';
 
     return (
         <>
@@ -130,7 +130,7 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                  <Card>
                     <CardHeader className="flex flex-row items-start justify-between">
                         <CardTitle>Información de la Factura</CardTitle>
-                        <Button variant="outline" size="sm" onClick={() => setHeaderModalOpen(true)} disabled={isFacturaCancelada}>
+                        <Button variant="outline" size="sm" onClick={() => setHeaderModalOpen(true)} disabled={isModificationDisabled}>
                             <Edit className="mr-2 h-4 w-4"/>
                             Editar Cabecera
                         </Button>
@@ -189,7 +189,7 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                         <CardTitle>Productos en la Factura</CardTitle>
                         <CardDescription>Añada, edite o elimine productos de esta factura.</CardDescription>
                     </div>
-                    <Button size="sm" onClick={handleOpenAddModal} disabled={isFacturaCancelada}>
+                    <Button size="sm" onClick={handleOpenAddModal} disabled={isModificationDisabled}>
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Añadir Producto
                     </Button>
@@ -219,10 +219,10 @@ export default function DetallesFacturaClient({ factura, initialDetalles, produc
                                         <TableCell className="text-right font-medium">${d.total.toFixed(2)}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-2">
-                                                <Button variant="ghost" size="icon" onClick={() => handleOpenEditModal(d)} disabled={isFacturaCancelada}>
+                                                <Button variant="ghost" size="icon" onClick={() => handleOpenEditModal(d)} disabled={isModificationDisabled}>
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" onClick={() => handleOpenDeleteDialog(d)} disabled={isFacturaCancelada}>
+                                                <Button variant="ghost" size="icon" onClick={() => handleOpenDeleteDialog(d)} disabled={isModificationDisabled}>
                                                     <Trash2 className="h-4 w-4 text-destructive" />
                                                 </Button>
                                             </div>
