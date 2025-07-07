@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { printFactura } from '@/app/facturas/actions';
 import type { FacturaCompra, FacturaDetalle, Producto } from '@/lib/types';
 import { Card } from "../ui/card";
+import { useSearchParams } from 'next/navigation';
 
 interface FacturaVistaClientProps {
     factura: FacturaCompra & { nombre_proveedor: string };
@@ -24,6 +25,18 @@ interface FacturaVistaClientProps {
 export default function FacturaVistaClient({ factura, detalles, productos }: FacturaVistaClientProps) {
     const { toast } = useToast();
     const [isPrinting, startPrinting] = useTransition();
+    const searchParams = useSearchParams();
+
+    React.useEffect(() => {
+        const autoprint = searchParams.get('autoprint');
+        if (autoprint === 'true') {
+          // Use a small timeout to allow the page to render fully before printing
+          const timer = setTimeout(() => {
+            window.print();
+          }, 500);
+          return () => clearTimeout(timer);
+        }
+      }, [searchParams]);
 
     const handlePrint = () => {
         startPrinting(async () => {
