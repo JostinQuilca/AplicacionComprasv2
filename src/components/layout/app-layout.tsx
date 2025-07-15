@@ -42,12 +42,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
     try {
       const storedData = localStorage.getItem('userData');
       if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        // Usamos los datos que nos proporcionaste
-        setUserData({
-            nombre: "Jostin Damian Quilca Portilla",
-            rol_nombre: "Administrador"
-        });
+        setUserData(JSON.parse(storedData));
       }
     } catch (error) {
         console.error("Failed to parse user data from localStorage", error);
@@ -57,14 +52,16 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
   const getInitials = (name: string) => {
     if (!name) return "";
-    const nameParts = name.split(' ');
-    const firstName = nameParts[0];
-    const lastName = nameParts.length > 2 ? nameParts[2] : '';
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    const names = name.split(' ');
+    const firstNameInitial = names[0] ? names[0][0] : '';
+    // Find the first last name, which would be the third word in "Jostin Damian Quilca Portilla"
+    const lastNameInitial = names.length > 2 ? names[2][0] : (names.length > 1 ? names[1][0] : '');
+    return `${firstNameInitial}${lastNameInitial}`.toUpperCase();
   };
-
+  
   const handleLogout = () => {
     localStorage.removeItem('userData');
+    setUserData(null);
     router.push('/login');
   };
 
