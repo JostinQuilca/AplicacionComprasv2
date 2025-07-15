@@ -16,7 +16,7 @@ import {
   SidebarTrigger,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import { Settings, FileText, DollarSign, ShieldCheck, Scale, KeyRound, Users, Home, LogOut, ShoppingCart } from 'lucide-react';
+import { Settings, FileText, DollarSign, ShieldCheck, Scale, KeyRound, Users, Home, LogOut, ShoppingCart, ClipboardList } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -108,6 +108,14 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                 <Link href="/facturas">
                   <FileText />
                   Facturas
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Reportes">
+                <Link href="/reportes/productos">
+                  <ClipboardList />
+                  Reportes
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
