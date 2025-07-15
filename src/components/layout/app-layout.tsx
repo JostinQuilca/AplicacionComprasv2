@@ -2,7 +2,7 @@
 'use client'
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   SidebarProvider,
   Sidebar,
@@ -13,12 +13,20 @@ import {
   SidebarMenuButton,
   SidebarInset,
   SidebarTrigger,
+  SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/icons/logo';
-import { Settings, FileText, DollarSign, ShieldCheck, Scale, KeyRound, Users, Home } from 'lucide-react';
-import { Toaster } from "@/components/ui/toaster"
+import { Settings, FileText, DollarSign, ShieldCheck, Scale, KeyRound, Users, Home, LogOut } from 'lucide-react';
+import { Button } from '../ui/button';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // Aquí iría la lógica para limpiar el token (ej. de cookies o localStorage)
+    router.push('/login');
+  };
+
   return (
     <SidebarProvider>
       <Sidebar collapsible="icon">
@@ -96,6 +104,16 @@ function AppLayout({ children }: { children: React.ReactNode }) {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
+        <SidebarFooter>
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <SidebarMenuButton onClick={handleLogout} tooltip="Cerrar Sesión">
+                        <LogOut />
+                        Cerrar Sesión
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarMenu>
+        </SidebarFooter>
       </Sidebar>
       <SidebarInset>
           <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
