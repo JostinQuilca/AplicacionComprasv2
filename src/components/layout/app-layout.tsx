@@ -34,39 +34,47 @@ interface UserData {
   rol_nombre: string;
 }
 
-function AppLayout({ children }: { children: React.ReactNode }) {
+function LayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [userData, setUserData] = React.useState<UserData | null>(null);
 
   React.useEffect(() => {
-    try {
-      const storedData = localStorage.getItem('userData');
-      if (storedData) {
-        setUserData(JSON.parse(storedData));
-      }
-    } catch (error) {
+    const handleStorageChange = () => {
+      try {
+        const storedData = localStorage.getItem('userData');
+        setUserData(storedData ? JSON.parse(storedData) : null);
+      } catch (error) {
         console.error("Failed to parse user data from localStorage", error);
         localStorage.removeItem('userData');
-    }
+        setUserData(null);
+      }
+    };
+
+    handleStorageChange(); 
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const getInitials = (name: string) => {
     if (!name) return "";
     const names = name.split(' ');
     const firstNameInitial = names[0] ? names[0][0] : '';
-    // Find the first last name, which would be the third word in "Jostin Damian Quilca Portilla"
     const lastNameInitial = names.length > 2 ? names[2][0] : (names.length > 1 ? names[1][0] : '');
     return `${firstNameInitial}${lastNameInitial}`.toUpperCase();
   };
   
   const handleLogout = () => {
     localStorage.removeItem('userData');
-    setUserData(null);
+    window.dispatchEvent(new Event('storage')); 
     router.push('/login');
   };
 
   return (
-    <SidebarProvider>
+    <>
       <Sidebar collapsible="icon">
         <SidebarHeader>
           <div className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center">
@@ -177,8 +185,16 @@ function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </SidebarInset>
+    </>
+  );
+}
+
+function AppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider>
+      <LayoutContent>{children}</LayoutContent>
     </SidebarProvider>
-  )
+  );
 }
 
 export default function AppLayoutClient({

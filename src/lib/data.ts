@@ -137,5 +137,6 @@ export async function getAuditoriaLogs(): Promise<AuditoriaLog[]> {
         console.error("API response for auditoria is not an array:", data);
         return [];
     }
-    return data;
+    // Filter to only show logs from the 'compras' module
+    return data.filter(log => log.modulo.toLowerCase() === 'compras');
 }
