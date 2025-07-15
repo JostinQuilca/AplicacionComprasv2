@@ -203,6 +203,12 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 }
 
 function AppLayout({ children }: { children: React.ReactNode }) {
+  const isLoginPage = usePathname() === '/login';
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
   return (
     <SidebarProvider>
       <LayoutContent>{children}</LayoutContent>
