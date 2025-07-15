@@ -15,9 +15,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpDown, Filter } from "lucide-react";
+import { ArrowUpDown, ChevronDown, Filter } from "lucide-react";
 import { AuditoriaLog } from "@/lib/types";
 import { Card } from "../ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 type SortKey = keyof AuditoriaLog | 'details_string';
 
@@ -87,7 +88,7 @@ const formatDetails = (details: Record<string, any>): string => {
                 return `${key}: '${details.antes[key]}' -> '${details.despues[key]}'`;
             }
             return null;
-        }).filter(Boolean).join(', ');
+        }).filter(Boolean).join('; ');
         return `Cambios: ${changes || 'Sin cambios detectados.'}`;
     }
 
@@ -99,7 +100,7 @@ const formatDetails = (details: Record<string, any>): string => {
         return `Registro eliminado: ${JSON.stringify(details.eliminado)}`;
     }
 
-    return JSON.stringify(details);
+    return JSON.stringify(details, null, 2);
 };
 
 
@@ -183,6 +184,7 @@ export default function AuditoriaClient({ initialData }: AuditoriaClientProps) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]"></TableHead>
                 <TableHead className="cursor-pointer" onClick={() => handleSort("timestamp")}>
                   <span className="flex items-center gap-2">Fecha y Hora <ArrowUpDown className="h-4 w-4" /></span>
                 </TableHead>
@@ -195,27 +197,46 @@ export default function AuditoriaClient({ initialData }: AuditoriaClientProps) {
                 <TableHead className="cursor-pointer" onClick={() => handleSort("tabla")}>
                    <span className="flex items-center gap-2">Tabla <ArrowUpDown className="h-4 w-4" /></span>
                 </TableHead>
-                <TableHead>Detalles</TableHead>
                 <TableHead>Usuario/Rol</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedData.length > 0 ? (
-                paginatedData.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{formatUTCDate(item.timestamp)}</TableCell>
-                      <TableCell>
-                        <Badge variant={getBadgeVariant(item.accion)} 
-                               className={getBadgeClassName(item.accion)}>
-                          {item.accion}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-medium">{item.modulo}</TableCell>
-                      <TableCell>{item.tabla}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground max-w-sm">{formatDetails(item.details)}</TableCell>
-                      <TableCell>{item.nombre_rol || 'N/A'}</TableCell>
-                    </TableRow>
-                  ))
+                 <Accordion type="single" collapsible className="w-full">
+                    {paginatedData.map((item) => (
+                      <AccordionItem value={`item-${item.id}`} key={item.id} className="border-b">
+                         <AccordionTrigger asChild>
+                            <TableRow className="cursor-pointer hover:bg-muted/50">
+                                <TableCell>
+                                     <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+                                </TableCell>
+                                <TableCell>{formatUTCDate(item.timestamp)}</TableCell>
+                                <TableCell>
+                                    <Badge variant={getBadgeVariant(item.accion)} 
+                                        className={getBadgeClassName(item.accion)}>
+                                    {item.accion}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell className="font-medium">{item.modulo}</TableCell>
+                                <TableCell>{item.tabla}</TableCell>
+                                <TableCell>{item.nombre_rol || 'N/A'}</TableCell>
+                            </TableRow>
+                         </AccordionTrigger>
+                        <AccordionContent>
+                           <tr className="bg-muted/50">
+                              <td colSpan={6} className="p-0">
+                                <div className="p-4">
+                                  <h4 className="font-semibold mb-2">Detalles del Registro:</h4>
+                                  <pre className="text-sm text-muted-foreground bg-background p-3 rounded-md overflow-auto">
+                                    {formatDetails(item.details)}
+                                  </pre>
+                                </div>
+                              </td>
+                            </tr>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center h-24">
