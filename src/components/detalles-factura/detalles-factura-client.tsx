@@ -39,14 +39,8 @@ const formatUTCDate = (dateString: string | null | undefined) => {
     if (!dateString) return 'N/A';
     try {
         const date = parseISO(dateString);
-        const userTimezoneOffset = date.getTimezoneOffset() * 60000;
-        return format(new Date(date.getTime() + userTimezoneOffset), "dd MMM, yyyy", { locale: es });
+        return format(date, "dd MMM, yyyy", { locale: es });
     } catch (error) {
-        const simpleDate = new Date(dateString);
-        if (!isNaN(simpleDate.getTime())) {
-            const userTimezoneOffset = simpleDate.getTimezoneOffset() * 60000;
-            return format(new Date(simpleDate.getTime() + userTimezoneOffset), "dd MMM, yyyy", { locale: es });
-        }
         console.error("Invalid date string:", dateString, error);
         return 'Fecha inválida';
     }

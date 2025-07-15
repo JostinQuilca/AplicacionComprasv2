@@ -59,8 +59,7 @@ export default function FacturaVistaClient({ factura, detalles, productos }: Fac
         if (!dateString) return 'N/A';
         try {
             const date = parseISO(dateString);
-            const userTimezoneOffset = date.getTimezoneOffset() * 60000;
-            return format(new Date(date.getTime() + userTimezoneOffset), "dd MMMM, yyyy", { locale: es });
+            return format(date, "dd MMMM, yyyy", { locale: es });
         } catch (error) {
             return 'Fecha inválida';
         }

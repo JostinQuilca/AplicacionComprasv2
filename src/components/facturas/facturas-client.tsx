@@ -43,8 +43,7 @@ const formatUTCDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
     try {
         const date = parseISO(dateString);
-        const userTimezoneOffset = date.getTimezoneOffset() * 60000;
-        return format(new Date(date.getTime() + userTimezoneOffset), 'dd/MM/yyyy');
+        return format(date, 'dd/MM/yyyy');
     } catch (error) {
         console.error("Invalid date string:", dateString, error);
         return 'Fecha inválida';
