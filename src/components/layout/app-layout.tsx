@@ -15,9 +15,7 @@ import {
   SidebarTrigger,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import { Logo } from '@/components/icons/logo';
-import { Settings, FileText, DollarSign, ShieldCheck, Scale, KeyRound, Users, Home, LogOut } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Settings, FileText, DollarSign, ShieldCheck, Scale, KeyRound, Users, Home, LogOut, ShoppingCart } from 'lucide-react';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -32,8 +30,8 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar collapsible="icon">
         <SidebarHeader>
           <div className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center">
-            <Logo className="h-6 w-6 text-primary" />
-            <span className="font-semibold text-xl group-data-[collapsible=icon]:hidden">Procuria</span>
+            <ShoppingCart className="h-6 w-6 text-primary" />
+            <span className="font-semibold text-xl group-data-[collapsible=icon]:hidden">Módulo Compras</span>
           </div>
         </SidebarHeader>
         <SidebarContent>

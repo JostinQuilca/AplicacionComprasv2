@@ -85,8 +85,8 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-md">
         <div className="relative rounded-xl border border-blue-500/20 bg-white/5 p-8 shadow-2xl shadow-blue-500/20 backdrop-blur-lg before:absolute before:-inset-px before:rounded-xl before:border before:border-blue-500/50 before:animate-pulse">
            <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">PROCURIA</h1>
-            <p className="text-purple-300">Módulo de Compras</p>
+            <h1 className="text-4xl font-bold text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">Módulo Compras</h1>
+            <p className="text-purple-300">Gestión de Proveedores y Facturación</p>
           </div>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
