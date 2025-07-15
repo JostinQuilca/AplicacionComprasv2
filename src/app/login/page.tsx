@@ -48,11 +48,15 @@ export default function LoginPage() {
 
     try {
       const result = await loginAction(formData);
-      if (result.success) {
+      if (result.success && result.data) {
         toast({
           title: 'Inicio de Sesión Exitoso',
           description: `Bienvenido, ${result.data.rol_nombre}.`,
         });
+        
+        // Guardar datos del usuario en localStorage
+        localStorage.setItem('userData', JSON.stringify(result.data));
+
         router.push('/');
       } else {
         toast({

@@ -15,6 +15,7 @@ type LoginResponse = {
     rol_nombre: string;
     rol_id: string;
     usuario: string;
+    nombre: string; 
 }
 
 export async function loginAction(
@@ -44,17 +45,12 @@ export async function loginAction(
     );
 
     if (!response.ok) {
-        // Asumimos que la API de seguridad puede devolver mensajes de error específicos
         const errorData = await response.json();
         return { success: false, message: errorData.message || "Credenciales incorrectas o usuario no autorizado." };
     }
     
     const loginData: LoginResponse = await response.json();
     
-    // Aquí es donde gestionarías el token, por ejemplo, guardándolo en una cookie segura.
-    // Por ahora, lo retornamos como éxito.
-    // La redirección se hará en el cliente al recibir la respuesta exitosa.
-
     return {
       success: true,
       message: 'Inicio de sesión exitoso.',
