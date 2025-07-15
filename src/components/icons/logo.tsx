@@ -7,21 +7,20 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="none"
-      strokeWidth="2.5"
+      stroke="currentColor"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       {...props}
     >
-      <defs>
-        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#fa7e1e" />
-          <stop offset="100%" stopColor="#d62976" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M17.5 5H9.5L6.5 12H14.5L11.5 19H17.5"
-        stroke="url(#logoGradient)"
-      />
+      <path d="M6 10a4 4 0 0 1-4-4 4 4 0 0 1 4-4" />
+      <path d="M6 22a4 4 0 0 0-4-4 4 4 0 0 0 4-4" />
+      <path d="M18 10a4 4 0 0 0 4-4 4 4 0 0 0-4-4" />
+      <path d="M18 22a4 4 0 0 1 4-4 4 4 0 0 1-4-4" />
+      <path d="M14 18v-4" />
+      <path d="M10 18v-4" />
+      <path d="M12 14v-4" />
+      <path d="M12 6V2" />
     </svg>
   );
 }
