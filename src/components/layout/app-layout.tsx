@@ -39,23 +39,26 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const [userData, setUserData] = React.useState<UserData | null>(null);
 
   React.useEffect(() => {
-    const handleStorageChange = () => {
+    // This function runs only on the client
+    const loadUserData = () => {
       try {
         const storedData = localStorage.getItem('userData');
         setUserData(storedData ? JSON.parse(storedData) : null);
       } catch (error) {
         console.error("Failed to parse user data from localStorage", error);
-        localStorage.removeItem('userData');
+        localStorage.removeItem('userData'); // Clean up corrupted data
         setUserData(null);
       }
     };
+    
+    // Load data on initial client render
+    loadUserData();
 
-    handleStorageChange(); 
-
-    window.addEventListener('storage', handleStorageChange);
+    // Listen for changes from other tabs/windows
+    window.addEventListener('storage', loadUserData);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('storage', loadUserData);
     };
   }, []);
 
@@ -69,7 +72,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   
   const handleLogout = () => {
     localStorage.removeItem('userData');
-    window.dispatchEvent(new Event('storage')); 
+    window.dispatchEvent(new Event('storage')); // Trigger update in the same tab
     router.push('/login');
   };
 
@@ -150,6 +153,16 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
+        <SidebarFooter>
+            <SidebarMenu>
+                 <SidebarMenuItem>
+                    <SidebarMenuButton onClick={handleLogout} tooltip="Cerrar Sesión">
+                        <LogOut />
+                        Cerrar Sesión
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarMenu>
+        </SidebarFooter>
       </Sidebar>
       <SidebarInset>
           <header className="sticky top-0 z-10 flex h-16 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
