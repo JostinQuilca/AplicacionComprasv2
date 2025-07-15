@@ -1,7 +1,8 @@
-import type { FacturaCompra, FacturaDetalle, Producto, Proveedor } from '@/lib/types';
+import type { FacturaCompra, FacturaDetalle, Producto, Proveedor, AuditoriaLog } from '@/lib/types';
 
 const API_BASE_URL_COMPRAS = "https://modulocompras.onrender.com/api";
 const API_BASE_URL_AD = "https://ad-xglt.onrender.com/api/v1";
+const API_BASE_URL_SEGURIDAD = "https://aplicacion-de-seguridad-v2.onrender.com/api";
 
 async function fetchData<T>(url: string, defaultReturnValue: T): Promise<T> {
     try {
@@ -128,4 +129,13 @@ export async function getDetallesByFacturaId(facturaId: number): Promise<Factura
     }));
 
     return detallesConNombres;
+}
+
+export async function getAuditoriaLogs(): Promise<AuditoriaLog[]> {
+    const data = await fetchData<AuditoriaLog[]>(`${API_BASE_URL_SEGURIDAD}/auditoria`, []);
+    if (!Array.isArray(data)) {
+        console.error("API response for auditoria is not an array:", data);
+        return [];
+    }
+    return data;
 }

@@ -92,4 +92,15 @@ export type FacturaDetalle = {
     total: number;
     usuario_creacion?: number;
     fecha_creacion?: string;
-}
+};
+
+export type AuditoriaLog = {
+    id: number;
+    accion: string;
+    modulo: string;
+    tabla: string;
+    id_usuario: number | null;
+    details: Record<string, any>;
+    timestamp: string;
+    nombre_rol: string;
+};
