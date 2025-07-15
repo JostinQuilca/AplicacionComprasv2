@@ -74,11 +74,39 @@ const getBadgeClassName = (accion: string) => {
     }
 };
 
+const formatDetails = (details: Record<string, any>): string => {
+    if (!details) return 'N/A';
+
+    if (details.tipo) {
+        return details.tipo;
+    }
+
+    if (details.antes && details.despues) {
+        const changes = Object.keys(details.despues).map(key => {
+            if (details.antes[key] !== details.despues[key]) {
+                return `${key}: '${details.antes[key]}' -> '${details.despues[key]}'`;
+            }
+            return null;
+        }).filter(Boolean).join(', ');
+        return `Cambios: ${changes || 'Sin cambios detectados.'}`;
+    }
+
+    if (details.nuevo) {
+        return `Nuevo registro: ${JSON.stringify(details.nuevo)}`;
+    }
+    
+    if (details.eliminado) {
+        return `Registro eliminado: ${JSON.stringify(details.eliminado)}`;
+    }
+
+    return JSON.stringify(details);
+};
+
 
 export default function AuditoriaClient({ initialData }: AuditoriaClientProps) {
   const [data] = React.useState<AuditoriaLog[]>(initialData.map(log => ({
       ...log,
-      details_string: JSON.stringify(log.details)
+      details_string: formatDetails(log.details)
   })));
   const [filter, setFilter] = React.useState("");
   const [sortConfig, setSortConfig] = React.useState<{ key: SortKey; direction: "asc" | "desc" } | null>({ key: 'timestamp', direction: 'desc' });
@@ -184,7 +212,7 @@ export default function AuditoriaClient({ initialData }: AuditoriaClientProps) {
                       </TableCell>
                       <TableCell className="font-medium">{item.modulo}</TableCell>
                       <TableCell>{item.tabla}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground max-w-xs truncate">{JSON.stringify(item.details)}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground max-w-sm">{formatDetails(item.details)}</TableCell>
                       <TableCell>{item.nombre_rol || 'N/A'}</TableCell>
                     </TableRow>
                   ))
