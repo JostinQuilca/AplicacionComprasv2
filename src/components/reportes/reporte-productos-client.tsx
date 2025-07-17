@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es } from 'date-fns/locale';
 import { Calendar as CalendarIcon, Download } from "lucide-react";
 import jsPDF from 'jspdf';
@@ -12,32 +12,47 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import type { FacturaCompra, Producto, FacturaDetalle } from "@/lib/types";
+import type { FacturaCompra, Producto, FacturaDetalle, Proveedor } from "@/lib/types";
+import { Combobox, ComboboxOption } from "../ui/combobox";
 
 interface ReporteProductosClientProps {
-  facturas: FacturaCompra[];
+  facturas: (FacturaCompra & { nombre_proveedor: string })[];
   productos: Producto[];
   detalles: FacturaDetalle[];
+  proveedores: Proveedor[];
 }
 
 interface ReporteData {
-  productoId: number;
-  nombreProducto: string;
-  cantidadTotal: number;
-  precioPromedio: number;
-  totalComprado: number;
+  numeroFactura: string;
+  fecha: string;
+  proveedor: string;
+  producto: string;
+  cantidad: number;
+  precioUnitario: number;
+  total: number;
 }
 
-export default function ReporteProductosClient({ facturas, productos, detalles }: ReporteProductosClientProps) {
+export default function ReporteProductosClient({ facturas, productos, detalles, proveedores }: ReporteProductosClientProps) {
   const { toast } = useToast();
   const [startDate, setStartDate] = React.useState<Date | undefined>();
   const [endDate, setEndDate] = React.useState<Date | undefined>();
-  const [reportData, setReportData] = React.useState<ReporteData[]>([]);
+  const [selectedProveedor, setSelectedProveedor] = React.useState<string>("");
+  const [selectedProducto, setSelectedProducto] = React.useState<string>("");
 
-  const productoMap = React.useMemo(() => new Map(productos.map(p => [p.id_producto, p.nombre])), [productos]);
+  const proveedorMap = React.useMemo(() => new Map(proveedores.map(p => [p.cedula_ruc, p.nombre])), [proveedores]);
+  const productoMap = React.useMemo(() => new Map(productos.map(p => [String(p.id_producto), p.nombre])), [productos]);
+
+  const proveedorOptions: ComboboxOption[] = React.useMemo(() => 
+      proveedores.map(p => ({ value: p.cedula_ruc, label: p.nombre })),
+      [proveedores]
+  );
+
+  const productoOptions: ComboboxOption[] = React.useMemo(() => 
+      productos.map(p => ({ value: String(p.id_producto), label: p.nombre })),
+      [productos]
+  );
 
   const handleGenerateReport = () => {
     if (!startDate || !endDate) {
@@ -52,169 +67,154 @@ export default function ReporteProductosClient({ facturas, productos, detalles }
     if (startDate > endDate) {
       toast({
         title: "Error de fechas",
-        description: "La fecha de inicio no puede ser posterior a la fecha de fin.",
+        description: "Las fechas no son válidas. Verifique el rango.",
         variant: "destructive",
       });
       return;
     }
     
-    // 1. Filtrar facturas por el rango de fechas y que no esten canceladas
-    const facturasEnRangoIds = new Set(
-        facturas
-            .filter(f => {
-                const fechaEmision = new Date(f.fecha_emision);
-                return fechaEmision >= startDate && fechaEmision <= endDate && f.estado !== 'Cancelada';
-            })
-            .map(f => f.id)
+    // 1. Filtrar facturas por fecha, proveedor y que no estén canceladas
+    const facturasFiltradas = facturas.filter(f => {
+        const fechaEmision = parseISO(f.fecha_emision);
+        const enRango = fechaEmision >= startDate && fechaEmision <= endDate;
+        const proveedorCoincide = !selectedProveedor || f.proveedor_cedula_ruc === selectedProveedor;
+        return enRango && proveedorCoincide && f.estado !== 'Cancelada';
+    });
+    
+    const facturasFiltradasIds = new Set(facturasFiltradas.map(f => f.id));
+
+    // 2. Filtrar detalles que correspondan a esas facturas y al producto seleccionado (si aplica)
+    const detallesFiltrados = detalles.filter(d => 
+        facturasFiltradasIds.has(d.factura_id) &&
+        (!selectedProducto || String(d.producto_id) === selectedProducto)
     );
 
-    // 2. Filtrar detalles que correspondan a esas facturas
-    const detallesEnRango = detalles.filter(d => facturasEnRangoIds.has(d.factura_id));
-
-    if (detallesEnRango.length === 0) {
-        toast({ title: "Sin resultados", description: "No se encontraron compras de productos en el rango de fechas seleccionado." });
-        setReportData([]);
+    if (detallesFiltrados.length === 0) {
+        toast({ title: "Sin resultados", description: "No se encontraron datos con los filtros aplicados." });
         return;
     }
 
-    // 3. Agrupar detalles por producto
-    const productosAgrupados = detallesEnRango.reduce((acc, detalle) => {
-        if (!acc[detalle.producto_id]) {
-            acc[detalle.producto_id] = {
-                productoId: detalle.producto_id,
-                nombreProducto: productoMap.get(detalle.producto_id) || 'Producto Desconocido',
-                cantidadTotal: 0,
-                totalComprado: 0,
-                items: 0, // para calcular promedio de precios
-            };
-        }
-        acc[detalle.producto_id].cantidadTotal += detalle.cantidad;
-        acc[detalle.producto_id].totalComprado += detalle.total;
-        acc[detalle.producto_id].items += detalle.cantidad * detalle.precio_unitario;
+    const facturaMap = new Map(facturasFiltradas.map(f => [f.id, f]));
 
-        return acc;
-    }, {} as Record<number, any>);
-
-    // 4. Calcular el precio promedio y formatear los datos finales
-    const generatedData = Object.values(productosAgrupados).map(p => ({
-        ...p,
-        precioPromedio: p.items / p.cantidadTotal,
-    }));
+    // 3. Construir los datos para el reporte
+    const generatedData: ReporteData[] = detallesFiltrados.map(detalle => {
+        const factura = facturaMap.get(detalle.factura_id);
+        return {
+            numeroFactura: factura?.numero_factura_proveedor || 'N/A',
+            fecha: factura ? format(parseISO(factura.fecha_emision), 'dd/MM/yyyy') : 'N/A',
+            proveedor: factura?.nombre_proveedor || 'Desconocido',
+            producto: productoMap.get(String(detalle.producto_id)) || 'Desconocido',
+            cantidad: detalle.cantidad,
+            precioUnitario: detalle.precio_unitario,
+            total: detalle.total
+        };
+    });
     
-    setReportData(generatedData);
+    handleDownloadPdf(generatedData);
   };
   
-  const totalGeneralComprado = React.useMemo(() => {
-    return reportData.reduce((acc, item) => acc + item.totalComprado, 0);
-  }, [reportData]);
-
-  const handleDownloadPdf = () => {
-    if (reportData.length === 0) {
-      toast({ title: "Sin datos", description: "Genere un reporte antes de descargarlo.", variant: "destructive" });
-      return;
-    }
+  const handleDownloadPdf = (data: ReporteData[]) => {
     const doc = new jsPDF();
     const formattedStartDate = startDate ? format(startDate, 'dd/MM/yyyy') : '';
     const formattedEndDate = endDate ? format(endDate, 'dd/MM/yyyy') : '';
-    
-    doc.text('Reporte de Compras por Producto', 14, 15);
+    const totalGeneral = data.reduce((acc, item) => acc + item.total, 0);
+
+    doc.text('Reporte Detallado de Facturas por Producto', 14, 15);
     doc.setFontSize(10);
-    doc.text(`Rango de fechas: ${formattedStartDate} - ${formattedEndDate}`, 14, 22);
+    doc.text(`Periodo: ${formattedStartDate} - ${formattedEndDate}`, 14, 22);
+    if(selectedProveedor) doc.text(`Proveedor: ${proveedorMap.get(selectedProveedor)}`, 14, 28);
+    if(selectedProducto) doc.text(`Producto: ${productoMap.get(selectedProducto)}`, 14, 34);
 
     autoTable(doc, {
-      startY: 28,
-      head: [['Producto', 'Cantidad Total', 'Precio Promedio', 'Total Comprado']],
-      body: reportData.map(item => [
-          item.nombreProducto, 
-          item.cantidadTotal,
-          `$${item.precioPromedio.toFixed(2)}`,
-          `$${item.totalComprado.toFixed(2)}`
+      startY: selectedProducto || selectedProveedor ? 40 : 28,
+      head: [['# Factura', 'Fecha', 'Proveedor', 'Producto', 'Cant.', 'P. Unit.', 'Total']],
+      body: data.map(item => [
+          item.numeroFactura,
+          item.fecha,
+          item.proveedor,
+          item.producto,
+          item.cantidad,
+          `$${item.precioUnitario.toFixed(2)}`,
+          `$${item.total.toFixed(2)}`
       ]),
-      foot: [['Total General', '', '', `$${totalGeneralComprado.toFixed(2)}`]],
+      foot: [['Total General', '', '', '', '', '', `$${totalGeneral.toFixed(2)}`]],
       showFoot: 'lastPage',
       footStyles: {
         fontStyle: 'bold',
         fillColor: [230, 230, 230],
         textColor: 20
+      },
+      didParseCell: function (data) {
+        if (data.row.section === 'body') {
+            // Limit supplier and product name length to avoid overflow
+            if (data.column.index === 2 || data.column.index === 3) {
+                if (Array.isArray(data.cell.text)) {
+                    data.cell.text[0] = data.cell.text[0].substring(0, 20);
+                }
+            }
+        }
       }
     });
     
-    doc.save(`reporte_productos_${formattedStartDate}_${formattedEndDate}.pdf`);
+    doc.save(`reporte_compras_productos_${formattedStartDate}_a_${formattedEndDate}.pdf`);
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
+    <Card>
         <CardHeader>
-          <CardTitle>Filtros del Reporte</CardTitle>
-          <CardDescription>Seleccione un rango de fechas para generar el reporte de compras.</CardDescription>
+            <CardTitle>Reporte Detallado de Compras</CardTitle>
+            <CardDescription>Filtre por fechas, proveedor y/o producto para generar un reporte detallado en PDF.</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col md:flex-row gap-4 items-center">
-            <Popover>
-                <PopoverTrigger asChild>
-                <Button variant={"outline"} className={cn("w-[240px] justify-start text-left font-normal", !startDate && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, "PPP", { locale: es }) : <span>Fecha de inicio</span>}
-                </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus locale={es}/>
-                </PopoverContent>
-            </Popover>
-            <Popover>
-                <PopoverTrigger asChild>
-                <Button variant={"outline"} className={cn("w-[240px] justify-start text-left font-normal", !endDate && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, "PPP", { locale: es }) : <span>Fecha de fin</span>}
-                </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={endDate} onSelect={setEndDate} disabled={{ before: startDate }} initialFocus locale={es} />
-                </PopoverContent>
-            </Popover>
-            <Button onClick={handleGenerateReport}>Generar Reporte</Button>
-        </CardContent>
-      </Card>
-
-      {reportData.length > 0 && (
-         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-                <CardTitle>Resultados del Reporte</CardTitle>
-                <CardDescription>Análisis de productos comprados en el período seleccionado.</CardDescription>
+        <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Popover>
+                    <PopoverTrigger asChild>
+                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {startDate ? format(startDate, "PPP", { locale: es }) : <span>Fecha de inicio</span>}
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus locale={es}/>
+                    </PopoverContent>
+                </Popover>
+                <Popover>
+                    <PopoverTrigger asChild>
+                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !endDate && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {endDate ? format(endDate, "PPP", { locale: es }) : <span>Fecha de fin</span>}
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={endDate} onSelect={setEndDate} disabled={{ before: startDate }} initialFocus locale={es} />
+                    </PopoverContent>
+                </Popover>
             </div>
-            <Button onClick={handleDownloadPdf} variant="outline">
-                <Download className="mr-2 h-4 w-4" />
-                Descargar PDF
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <Table>
-                <TableHeader>
-                <TableRow>
-                    <TableHead>Producto</TableHead>
-                    <TableHead className="text-right">Cantidad Total</TableHead>
-                    <TableHead className="text-right">Precio Promedio</TableHead>
-                    <TableHead className="text-right">Total Comprado</TableHead>
-                </TableRow>
-                </TableHeader>
-                <TableBody>
-                {reportData.map((item) => (
-                    <TableRow key={item.productoId}>
-                    <TableCell className="font-medium">{item.nombreProducto}</TableCell>
-                    <TableCell className="text-right">{item.cantidadTotal}</TableCell>
-                    <TableCell className="text-right">${item.precioPromedio.toFixed(2)}</TableCell>
-                    <TableCell className="text-right font-semibold">${item.totalComprado.toFixed(2)}</TableCell>
-                    </TableRow>
-                ))}
-                </TableBody>
-            </Table>
-          </CardContent>
-          <CardFooter className="justify-end font-bold text-lg">
-             Total General Comprado: ${totalGeneralComprado.toFixed(2)}
-          </CardFooter>
-        </Card>
-      )}
-    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Combobox
+                    options={proveedorOptions}
+                    value={selectedProveedor}
+                    onChange={setSelectedProveedor}
+                    placeholder="Filtrar por proveedor (opcional)"
+                    searchPlaceholder="Buscar proveedor..."
+                    emptyPlaceholder="No se encontró proveedor."
+                />
+                 <Combobox
+                    options={productoOptions}
+                    value={selectedProducto}
+                    onChange={setSelectedProducto}
+                    placeholder="Filtrar por producto (opcional)"
+                    searchPlaceholder="Buscar producto..."
+                    emptyPlaceholder="No se encontró producto."
+                />
+            </div>
+            <div className="flex justify-end">
+                <Button onClick={handleGenerateReport}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Generar Reporte
+                </Button>
+            </div>
+        </CardContent>
+    </Card>
   );
 }
