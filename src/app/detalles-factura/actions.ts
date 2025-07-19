@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { FacturaCompraSchema, FacturaDetalleSchema } from "@/lib/types";
 import { formatZodErrors, handleApiError, type ActionResponse } from "@/lib/actions-utils";
 import { getDetallesByFacturaId, getFactura } from "@/lib/data";
-import { getIvaRate } from "@/lib/config";
+import { getIvaRateAction } from "@/lib/iva/actions";
 
 const API_URL = "https://modulocompras.onrender.com/api/detalles-factura";
 const FACTURAS_API_URL = "https://modulocompras.onrender.com/api/facturas";
@@ -103,7 +103,7 @@ export async function addDetalle(
   }
 
   const { cantidad, precio_unitario, aplica_iva } = validatedFields.data;
-  const IVA_RATE = getIvaRate(); // Obtener la tasa de IVA actual
+  const IVA_RATE = await getIvaRateAction(); // Obtener la tasa de IVA actual
   const subtotal = cantidad * precio_unitario;
   const iva = aplica_iva ? subtotal * IVA_RATE : 0;
   const total = subtotal + iva;
@@ -172,7 +172,7 @@ export async function updateDetalle(
   }
 
   const { cantidad, precio_unitario, aplica_iva } = validatedFields.data;
-  const IVA_RATE = getIvaRate(); // Obtener la tasa de IVA actual
+  const IVA_RATE = await getIvaRateAction(); // Obtener la tasa de IVA actual
   const subtotal = cantidad * precio_unitario;
   const iva = aplica_iva ? subtotal * IVA_RATE : 0;
   const total = subtotal + iva;
