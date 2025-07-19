@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -205,7 +206,7 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
                         mode="single"
                         selected={endDate}
                         onSelect={setEndDate}
-                        disabled={{ before: startDate }}
+                        disabled={startDate ? { before: startDate } : undefined}
                         initialFocus
                         locale={es}
                     />
@@ -256,3 +257,5 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
     </div>
   );
 }
+
+    

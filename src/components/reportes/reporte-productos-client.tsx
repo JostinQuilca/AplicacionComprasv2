@@ -226,7 +226,7 @@ export default function ReporteProductosClient({ facturas, productos, detalles, 
                       </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={endDate} onSelect={setEndDate} disabled={{ before: startDate }} initialFocus locale={es} />
+                      <Calendar mode="single" selected={endDate} onSelect={setEndDate} disabled={startDate ? { before: startDate } : undefined} initialFocus locale={es} />
                       </PopoverContent>
                   </Popover>
               </div>
@@ -318,3 +318,5 @@ export default function ReporteProductosClient({ facturas, productos, detalles, 
     </div>
   );
 }
+
+    
