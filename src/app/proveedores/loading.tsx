@@ -22,6 +22,8 @@ export default function Loading() {
                         <TableHead><Skeleton className="h-5 w-full" /></TableHead>
                         <TableHead><Skeleton className="h-5 w-full" /></TableHead>
                         <TableHead><Skeleton className="h-5 w-full" /></TableHead>
+                        <TableHead><Skeleton className="h-5 w-full" /></TableHead>
+                        <TableHead><Skeleton className="h-5 w-full" /></TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -32,6 +34,8 @@ export default function Loading() {
                             <TableCell><Skeleton className="h-5 w-full" /></TableCell>
                             <TableCell><Skeleton className="h-5 w-full" /></TableCell>
                             <TableCell><Skeleton className="h-5 w-full" /></TableCell>
+                            <TableCell><Skeleton className="h-5 w-full" /></TableCell>
+                             <TableCell><Skeleton className="h-5 w-full" /></TableCell>
                             <TableCell><Skeleton className="h-5 w-full" /></TableCell>
                         </TableRow>
                     ))}

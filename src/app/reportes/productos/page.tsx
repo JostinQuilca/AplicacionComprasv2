@@ -1,8 +1,10 @@
 
 import { getFacturas, getProductos, getDetalles, getProveedores } from '@/lib/data';
 import ReporteProductosClient from '@/components/reportes/reporte-productos-client';
+import { Suspense } from 'react';
+import ReportesProductosLoading from './loading';
 
-export default async function ReportesProductosPage() {
+async function ReportesProductosData() {
   const [facturasData, productos, detalles, proveedores] = await Promise.all([
     getFacturas(),
     getProductos(),
@@ -17,13 +19,21 @@ export default async function ReportesProductosPage() {
   }));
 
   return (
+    <ReporteProductosClient 
+      facturas={facturas} 
+      productos={productos} 
+      detalles={detalles}
+      proveedores={proveedores}
+    />
+  );
+}
+
+export default function ReportesProductosPage() {
+  return (
     <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-      <ReporteProductosClient 
-        facturas={facturas} 
-        productos={productos} 
-        detalles={detalles}
-        proveedores={proveedores}
-      />
+      <Suspense fallback={<ReportesProductosLoading />}>
+        <ReportesProductosData />
+      </Suspense>
     </main>
   );
 }
