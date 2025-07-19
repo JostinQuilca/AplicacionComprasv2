@@ -1,9 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Your Next.js configuration options can go here.
-  // For example, to add environment variables:
-  // env: {
-  //   CUSTOM_ENV_VAR: process.env.CUSTOM_ENV_VAR,
+  // Any specific Next.js configurations can go here.
+  // For example, if you were using external images:
+  // images: {
+  //   remotePatterns: [
+  //     {
+  //       protocol: 'https',
+  //       hostname: 'example.com',
+  //       port: '',
+  //       pathname: '/images/**',
+  //     },
+  //   ],
   // },
 };
 

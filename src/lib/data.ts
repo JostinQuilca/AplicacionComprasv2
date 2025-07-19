@@ -1,8 +1,8 @@
 import type { FacturaCompra, FacturaDetalle, Producto, Proveedor, AuditoriaLog } from '@/lib/types';
 
-const API_BASE_URL_COMPRAS = "https://modulocompras.onrender.com/api";
-const API_BASE_URL_AD = "https://ad-xglt.onrender.com/api/v1";
-const API_BASE_URL_SEGURIDAD = "https://aplicacion-de-seguridad-v2.onrender.com/api";
+const API_BASE_URL_COMPRAS = process.env.NEXT_PUBLIC_API_URL_COMPRAS || "https://modulocompras-production-843f.up.railway.app/api";
+const API_BASE_URL_AD = process.env.NEXT_PUBLIC_API_URL_AD || "https://ad-xglt.onrender.com/api/v1";
+const API_BASE_URL_SEGURIDAD = process.env.NEXT_PUBLIC_API_URL_SEGURIDAD || "https://aplicacion-de-seguridad-v2.onrender.com/api";
 
 async function fetchData<T>(url: string, defaultReturnValue: T): Promise<T> {
   try {
