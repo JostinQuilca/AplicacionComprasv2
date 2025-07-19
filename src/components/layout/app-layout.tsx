@@ -27,6 +27,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ThemeToggle } from './theme-toggle';
 
 interface UserData {
   id_usuario: number;
@@ -178,34 +179,37 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       <SidebarInset>
           <header className="sticky top-0 z-10 flex h-16 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
             <SidebarTrigger />
-             {userData ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                      <Avatar className="h-10 w-10">
-                         <AvatarFallback>{getInitials(userData.nombre)}</AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{userData.nombre}</p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          {isAdministrador ? 'Administrador' : userData.nombre_rol}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Cerrar Sesión</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-            ) : (
-                <Skeleton className="h-10 w-10 rounded-full" />
-            )}
+            <div className="flex items-center gap-4">
+              <ThemeToggle />
+              {userData ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                        <Avatar className="h-10 w-10">
+                           <AvatarFallback>{getInitials(userData.nombre)}</AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">{userData.nombre}</p>
+                          <p className="text-xs leading-none text-muted-foreground">
+                            {isAdministrador ? 'Administrador' : userData.nombre_rol}
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Cerrar Sesión</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+              ) : (
+                  <Skeleton className="h-10 w-10 rounded-full" />
+              )}
+            </div>
           </header>
         <div className="min-h-[calc(100vh-4rem)] w-full">
           {children}
