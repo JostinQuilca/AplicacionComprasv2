@@ -1,7 +1,8 @@
+
 "use client";
 
 import * as React from "react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es } from 'date-fns/locale';
 import { Calendar as CalendarIcon, ArrowUpDown, Download } from "lucide-react";
 import jsPDF from 'jspdf';
@@ -56,7 +57,7 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
     }
 
     const facturasCredito = facturas.filter(f => {
-        const fechaEmision = new Date(f.fecha_emision);
+        const fechaEmision = parseISO(f.fecha_emision);
         return (
             f.tipo_pago === 'Crédito' &&
             f.estado !== 'Cancelada' &&
@@ -68,7 +69,7 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
     if (facturasCredito.length === 0) {
         toast({
             title: "Sin resultados",
-            description: "No se encontraron proveedores o créditos para el rango de fechas seleccionado."
+            description: "No se encontraron proveedores con facturas a crédito para el rango de fechas seleccionado."
         });
         setReportData([]);
         return;
@@ -93,7 +94,7 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
     setReportData(generatedData);
     if(generatedData.length === 0) {
         toast({
-            title: "Sin resultados",
+            title: "Sin saldos pendientes",
             description: "No se encontraron saldos pendientes para el rango de fechas seleccionado."
         });
     }
@@ -103,10 +104,12 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
     let sortableData = [...reportData];
     if (sortConfig !== null) {
       sortableData.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
+        const aVal = a[sortConfig.key];
+        const bVal = b[sortConfig.key];
+        if (aVal < bVal) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
+        if (aVal > bVal) {
           return sortConfig.direction === 'asc' ? 1 : -1;
         }
         return 0;
@@ -116,13 +119,6 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
   }, [reportData, sortConfig]);
 
   const handleSort = (key: SortKey) => {
-    if (reportData.length < 2) {
-      toast({
-        title: "No se puede ordenar",
-        description: "No hay suficientes datos para ordenar.",
-      });
-      return;
-    }
     let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
@@ -136,6 +132,10 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
 
 
   const handleDownloadPdf = () => {
+    if (reportData.length === 0) {
+        toast({ title: "Sin datos", description: "No hay datos para generar el PDF."});
+        return;
+    }
     const doc = new jsPDF();
     const formattedStartDate = startDate ? format(startDate, 'dd/MM/yyyy') : '';
     const formattedEndDate = endDate ? format(endDate, 'dd/MM/yyyy') : '';
@@ -157,7 +157,7 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
       }
     });
     
-    doc.save('reporte_saldos_proveedores.pdf');
+    doc.save(`reporte_saldos_proveedores_${formattedStartDate}_a_${formattedEndDate}.pdf`);
   };
 
   return (
@@ -165,14 +165,14 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
       <Card>
         <CardHeader>
           <CardTitle>Filtros del Reporte</CardTitle>
-          <CardDescription>Seleccione un rango de fechas para generar el reporte de saldos.</CardDescription>
+          <CardDescription>Seleccione un rango de fechas para generar el reporte de saldos de proveedores con facturas a crédito.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col md:flex-row gap-4 items-center">
             <div className="grid gap-2">
                 <Popover>
                     <PopoverTrigger asChild>
                     <Button
-                        id="date"
+                        id="date-start"
                         variant={"outline"}
                         className={cn("w-[240px] justify-start text-left font-normal", !startDate && "text-muted-foreground")}
                     >
@@ -195,7 +195,7 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
                 <Popover>
                     <PopoverTrigger asChild>
                     <Button
-                        id="date"
+                        id="date-end"
                         variant={"outline"}
                         className={cn("w-[240px] justify-start text-left font-normal", !endDate && "text-muted-foreground")}
                     >
@@ -251,8 +251,8 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
                 </TableBody>
             </Table>
           </CardContent>
-          <CardFooter className="justify-end font-bold text-lg">
-             Total: ${totalSaldo.toFixed(2)}
+          <CardFooter className="justify-end font-bold text-lg border-t pt-4">
+             Total General: ${totalSaldo.toFixed(2)}
           </CardFooter>
         </Card>
       )}
