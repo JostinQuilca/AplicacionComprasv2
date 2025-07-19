@@ -82,7 +82,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
   
-  const isAdministrador = userData?.usuario === 'Administrador';
+  const isAdministrador = userData?.nombre_rol === 'Administrador';
 
   return (
     <>
@@ -178,7 +178,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">{userData.nombre}</p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        {isAdministrador ? 'Administrador' : userData.nombre_rol}
+                        {userData.nombre_rol}
                       </p>
                     </div>
                   </DropdownMenuLabel>

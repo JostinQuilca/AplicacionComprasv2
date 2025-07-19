@@ -21,8 +21,8 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
         const storedData = localStorage.getItem('userData');
         if (storedData) {
           const userData: UserData = JSON.parse(storedData);
-          // Check if user is 'Administrador'
-          if (userData.usuario === 'Administrador') {
+          // Check if user role is 'Administrador'
+          if (userData.nombre_rol === 'Administrador') {
             setIsAuthorized(true);
           } else {
             // If not admin, redirect to home
