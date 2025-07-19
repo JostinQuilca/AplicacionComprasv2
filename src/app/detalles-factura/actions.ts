@@ -6,10 +6,10 @@ import { format } from 'date-fns';
 import { FacturaCompraSchema, FacturaDetalleSchema } from "@/lib/types";
 import { formatZodErrors, handleApiError, type ActionResponse } from "@/lib/actions-utils";
 import { getDetallesByFacturaId } from "@/lib/data";
+import { IVA_RATE } from "@/lib/config"; // Importa la tasa de IVA desde la configuración
 
 const API_URL = "https://modulocompras.onrender.com/api/detalles-factura";
 const FACTURAS_API_URL = "https://modulocompras.onrender.com/api/facturas";
-const IVA_RATE = 0.15;
 
 /**
  * Recalcula y actualiza los totales (subtotal, iva, total) de una factura

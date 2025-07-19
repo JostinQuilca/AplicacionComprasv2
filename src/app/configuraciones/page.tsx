@@ -1,28 +1,45 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import withAuth from "@/components/layout/withAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { getIvaRate, setIvaRate as saveIvaRate } from "@/lib/config";
 
 function ConfiguracionesPage() {
-  // El valor del IVA se obtiene de una constante, pero se gestiona con estado para permitir la edición.
-  // En el futuro, este valor se podría obtener y guardar en una base de datos o archivo de configuración.
-  const [ivaRate, setIvaRate] = useState(15.00);
+  const [ivaRate, setIvaRate] = useState<number>(15.00);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Carga el valor inicial del localStorage al montar el componente.
+    setIvaRate(getIvaRate() * 100);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // La lógica de guardado permanente se implementará en el futuro.
-    // Por ahora, solo muestra una notificación de éxito.
-    toast({
-      title: "Guardado Simulado",
-      description: `La tasa de IVA se ha establecido en ${ivaRate}%. La funcionalidad de guardado real se implementará próximamente.`,
-    });
+    setIsSaving(true);
+    
+    try {
+      // Guarda el nuevo valor en localStorage.
+      saveIvaRate(ivaRate / 100);
+      toast({
+        title: "Guardado Exitoso",
+        description: `La tasa de IVA se ha actualizado a ${ivaRate.toFixed(2)}%.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error al Guardar",
+        description: "No se pudo guardar la configuración.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -54,8 +71,8 @@ function ConfiguracionesPage() {
                 Este valor se usará para calcular automáticamente el IVA en los detalles de las facturas.
               </p>
             </div>
-             <Button type="submit">
-              Guardar Cambios
+             <Button type="submit" disabled={isSaving}>
+              {isSaving ? "Guardando..." : "Guardar Cambios"}
             </Button>
           </form>
         </CardContent>
