@@ -28,7 +28,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from '@/components/ui/button';
 
-
 interface UserData {
   nombre: string;
   rol_nombre: string;
@@ -41,44 +40,20 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const loadUserData = () => {
-      try {
-        const storedData = localStorage.getItem('userData');
-        if (storedData) {
-          setUserData(JSON.parse(storedData));
-        } else {
-          router.push('/login'); // Redirect if no user data
-        }
-      } catch (error) {
-        console.error("Failed to parse user data from localStorage", error);
-        localStorage.removeItem('userData');
-        setUserData(null);
+    try {
+      const storedData = localStorage.getItem('userData');
+      if (storedData) {
+        setUserData(JSON.parse(storedData));
+      } else {
         router.push('/login');
-      } finally {
-        setLoading(false);
       }
-    };
-    
-    loadUserData();
-
-    const handleStorageChange = () => {
-        loadUserData();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
+    } catch (error) {
+      console.error("Failed to parse user data from localStorage", error);
+      router.push('/login');
+    } finally {
+      setLoading(false);
+    }
   }, [router]);
-
-  const getInitials = (name: string) => {
-    if (!name) return "";
-    const names = name.split(' ');
-    const firstNameInitial = names[0] ? names[0][0] : '';
-    const lastNameInitial = names.length > 2 ? names[2][0] : (names.length > 1 ? names[1][0] : '');
-    return `${firstNameInitial}${lastNameInitial}`.toUpperCase();
-  };
   
   const handleLogout = () => {
     localStorage.removeItem('userData');
@@ -86,9 +61,13 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
   
-  const userRolId = userData ? parseInt(userData.rol_id, 10) : null;
-  const isAdministrador = userRolId === 16;
-  const isGestor = userRolId === 7;
+  const getInitials = (name: string) => {
+    if (!name) return "";
+    const names = name.split(' ');
+    const firstNameInitial = names[0] ? names[0][0] : '';
+    const lastNameInitial = names.length > 2 ? names[2][0] : (names.length > 1 ? names[1][0] : '');
+    return `${firstNameInitial}${lastNameInitial}`.toUpperCase();
+  };
 
   if (loading) {
     return (
@@ -97,6 +76,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         </div>
     );
   }
+
+  const userRolId = userData ? parseInt(userData.rol_id, 10) : null;
+  const isAdministrador = userRolId === 16;
+  const isGestor = userRolId === 7;
 
   return (
     <>
@@ -242,12 +225,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 }
 
 function AppLayout({ children }: { children: React.ReactNode }) {
-  const isLoginPage = usePathname() === '/login';
-
-  if (isLoginPage) {
-    return <>{children}</>;
-  }
-
   return (
     <SidebarProvider>
       <LayoutContent>{children}</LayoutContent>
