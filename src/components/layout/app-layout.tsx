@@ -82,7 +82,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
   
-  const isAdministrador = userData?.nombre_rol === 'Administrador de Compras';
+  const isAdministrador = userData?.nombre_rol === 'Administrador';
 
   return (
     <>

@@ -17,25 +17,24 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
     const [isAuthorized, setIsAuthorized] = useState(false);
 
     useEffect(() => {
+      let userData: UserData | null = null;
       try {
         const storedData = localStorage.getItem('userData');
         if (storedData) {
-          const userData: UserData = JSON.parse(storedData);
-          // Check if user role is 'Administrador'
-          if (userData.nombre_rol === 'Administrador de Compras') {
-            setIsAuthorized(true);
-          } else {
-            // If not admin, redirect to home
-            router.replace('/');
-          }
-        } else {
-          // If no user data, redirect to login
-          router.replace('/login');
+          userData = JSON.parse(storedData);
         }
       } catch (error) {
-        console.error("Authentication check failed", error);
+        console.error("Authentication check failed while parsing localStorage", error);
         router.replace('/login');
+        return;
       }
+      
+      if (userData && userData.nombre_rol === 'Administrador') {
+        setIsAuthorized(true);
+      } else {
+        router.replace(userData ? '/' : '/login');
+      }
+
     }, [router]);
 
     if (!isAuthorized) {
