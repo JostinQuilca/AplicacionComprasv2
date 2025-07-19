@@ -6,9 +6,10 @@ import type {
   AuditoriaLog,
 } from "@/lib/types";
 
-const API_BASE_URL_COMPRAS = process.env.NEXT_PUBLIC_API_URL_COMPRAS;
-const API_BASE_URL_AD = process.env.NEXT_PUBLIC_API_URL_AD;
-const API_BASE_URL_SEGURIDAD = process.env.NEXT_PUBLIC_API_URL_SEGURIDAD;
+const API_BASE_URL_COMPRAS = process.env.NEXT_PUBLIC_API_URL_COMPRAS || "https://modulocompras.onrender.com/api";
+const API_BASE_URL_AD = process.env.NEXT_PUBLIC_API_URL_AD || "https://ad-xglt.onrender.com/api/v1";
+const API_BASE_URL_SEGURIDAD = process.env.NEXT_PUBLIC_API_URL_SEGURIDAD || "https://aplicacion-de-seguridad-v2.onrender.com/api";
+
 
 async function fetchData<T>(url: string, defaultReturnValue: T): Promise<T> {
   if (!url || url.includes('undefined')) {
