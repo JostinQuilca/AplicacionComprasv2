@@ -37,7 +37,7 @@ export async function loginAction(
   }
 
   const { usuario, contrasena } = validatedFields.data;
-  const id_modulo = 'COM';
+  const id_modulo = 'compras';
 
   try {
     const response = await fetch(
