@@ -38,30 +38,39 @@ interface UserData {
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [userData, setUserData] = React.useState<UserData | null>(null);
+  const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    // This function runs only on the client
     const loadUserData = () => {
       try {
         const storedData = localStorage.getItem('userData');
-        setUserData(storedData ? JSON.parse(storedData) : null);
+        if (storedData) {
+          setUserData(JSON.parse(storedData));
+        } else {
+          router.push('/login'); // Redirect if no user data
+        }
       } catch (error) {
         console.error("Failed to parse user data from localStorage", error);
-        localStorage.removeItem('userData'); // Clean up corrupted data
+        localStorage.removeItem('userData');
         setUserData(null);
+        router.push('/login');
+      } finally {
+        setLoading(false);
       }
     };
     
-    // Load data on initial client render
     loadUserData();
 
-    // Listen for changes from other tabs/windows
-    window.addEventListener('storage', loadUserData);
+    const handleStorageChange = () => {
+        loadUserData();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
 
     return () => {
-      window.removeEventListener('storage', loadUserData);
+      window.removeEventListener('storage', handleStorageChange);
     };
-  }, []);
+  }, [router]);
 
   const getInitials = (name: string) => {
     if (!name) return "";
@@ -73,13 +82,21 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   
   const handleLogout = () => {
     localStorage.removeItem('userData');
-    window.dispatchEvent(new Event('storage')); // Trigger update in the same tab
+    setUserData(null);
     router.push('/login');
   };
   
   const userRolId = userData ? parseInt(userData.rol_id, 10) : null;
   const isAdministrador = userRolId === 16;
   const isGestor = userRolId === 7;
+
+  if (loading) {
+    return (
+        <div className="flex h-screen items-center justify-center">
+            <div className="text-lg font-semibold">Cargando...</div>
+        </div>
+    );
+  }
 
   return (
     <>
