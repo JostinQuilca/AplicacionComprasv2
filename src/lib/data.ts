@@ -9,20 +9,22 @@ async function fetchData<T>(url: string, defaultReturnValue: T): Promise<T> {
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) {
       const errorText = await res.text();
-      // Log the error instead of throwing, to prevent page crashes on API errors.
       console.error(
         `API request failed to ${url}: ${res.status} ${res.statusText} - ${errorText}`
       );
       return defaultReturnValue;
     }
-    // Handle cases where response might be empty
     const text = await res.text();
     if (!text) {
       return defaultReturnValue;
     }
     return JSON.parse(text);
   } catch (error) {
-    console.error(`Failed to fetch from ${url}`, error);
+    if (error instanceof Error && error.name === 'TypeError') {
+      console.error(`Network error or failed to fetch from ${url}: ${error.message}`);
+    } else {
+      console.error(`Failed to fetch or parse data from ${url}`, error);
+    }
     return defaultReturnValue;
   }
 }
@@ -36,7 +38,6 @@ export async function getProveedores(): Promise<Proveedor[]> {
     console.error("API response for proveedores is not an array:", data);
     return [];
   }
-  // Ensure fecha_creacion is a string for sorting, matching dashboard logic
   return data.map((p) => ({
     ...p,
     fecha_creacion: p.fecha_creacion || new Date(0).toISOString(),
@@ -58,24 +59,19 @@ export async function getFacturas(): Promise<FacturaCompra[]> {
 }
 
 export async function getProductos(): Promise<Producto[]> {
-  // Fetch from the new URL structure
   const data = await fetchData<any>(`${API_BASE_URL_AD}/productos`, []);
   let productos: any[] = [];
 
-  // Adapt to the new response structure which might be { "productos": [...] }
   if (data && Array.isArray(data.productos)) {
     productos = data.productos;
   }
-  // Handle if the response is a direct array
   else if (Array.isArray(data)) {
     productos = data;
   }
-  // If the structure is unexpected, return an empty array
   else {
     return [];
   }
 
-  // Map the response to match the Producto type, handling the 'pvp' field
   return productos.map((p) => ({
     ...p,
     precio_unitario: String(p.pvp ?? p.precio_unitario ?? "0.00"),
@@ -148,6 +144,5 @@ export async function getAuditoriaLogs(): Promise<AuditoriaLog[]> {
         console.error("API response for auditoria is not an array:", data);
         return [];
     }
-    // Filter to only show logs from the 'compras' module
     return data.filter(log => log.modulo.toLowerCase() === 'compras');
 }
