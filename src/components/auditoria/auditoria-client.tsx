@@ -105,16 +105,16 @@ const formatDetails = (details: Record<string, any>): string => {
 };
 
 const getDisplayUser = (item: AuditoriaLog): string => {
-    // Si el usuario en los detalles es 'Administrador', se le da prioridad.
-    if (item.details?.usuario?.toLowerCase() === 'administrador') {
-      return 'Administrador';
-    }
-    // Si hay un id_usuario, es una acción de un usuario logueado.
-    if (item.id_usuario !== null) {
-      return item.nombre_rol || 'Usuario';
-    }
-    // Si no hay id_usuario, se asume que es una acción del sistema.
-    return 'Sistema';
+  // If the role is explicitly 'Administrador', always show that.
+  if (item.nombre_rol?.toLowerCase() === 'administrador') {
+    return 'Administrador';
+  }
+  // If there's a user ID, it's a logged-in user action.
+  if (item.id_usuario !== null && item.id_usuario !== undefined) {
+    return item.nombre_rol || 'Usuario';
+  }
+  // Otherwise, assume it's a system action.
+  return 'Sistema';
 };
 
 
