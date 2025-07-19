@@ -167,14 +167,14 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
           <CardTitle>Filtros del Reporte</CardTitle>
           <CardDescription>Seleccione un rango de fechas para generar el reporte de saldos de proveedores con facturas a crédito.</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col md:flex-row gap-4 items-center">
-            <div className="grid gap-2">
+        <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
                 <Popover>
                     <PopoverTrigger asChild>
                     <Button
                         id="date-start"
                         variant={"outline"}
-                        className={cn("w-[240px] justify-start text-left font-normal", !startDate && "text-muted-foreground")}
+                        className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}
                     >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {startDate ? format(startDate, "PPP", { locale: es }) : <span>Fecha de inicio</span>}
@@ -190,14 +190,12 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
                     />
                     </PopoverContent>
                 </Popover>
-            </div>
-            <div className="grid gap-2">
                 <Popover>
                     <PopoverTrigger asChild>
                     <Button
                         id="date-end"
                         variant={"outline"}
-                        className={cn("w-[240px] justify-start text-left font-normal", !endDate && "text-muted-foreground")}
+                        className={cn("w-full justify-start text-left font-normal", !endDate && "text-muted-foreground")}
                     >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {endDate ? format(endDate, "PPP", { locale: es }) : <span>Fecha de fin</span>}
@@ -214,8 +212,8 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
                     />
                     </PopoverContent>
                 </Popover>
+              <Button onClick={handleGenerateReport} className="w-full lg:w-auto">Generar Reporte</Button>
             </div>
-            <Button onClick={handleGenerateReport}>Generar Reporte</Button>
         </CardContent>
       </Card>
 
@@ -259,3 +257,5 @@ export default function SaldosProveedorClient({ proveedores, facturas }: SaldosP
     </div>
   );
 }
+
+    
