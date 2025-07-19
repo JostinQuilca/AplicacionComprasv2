@@ -29,7 +29,7 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
         return;
       }
       
-      if (userData && userData.nombre_rol === 'Administrador') {
+      if (userData && userData.usuario === 'Administrador') {
         setIsAuthorized(true);
       } else {
         router.replace(userData ? '/' : '/login');
