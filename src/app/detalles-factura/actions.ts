@@ -83,8 +83,8 @@ export async function addDetalle(
   const rawData = {
     factura_id: Number(formData.get("factura_id")),
     producto_id: Number(formData.get("producto_id")),
-    cantidad: formData.get("cantidad"),
-    precio_unitario: formData.get("precio_unitario"),
+    cantidad: Number(formData.get("cantidad")),
+    precio_unitario: Number(formData.get("precio_unitario")),
     aplica_iva: formData.get("aplica_iva") === "on",
   };
 
@@ -152,8 +152,8 @@ export async function updateDetalle(
   const rawData = {
     factura_id: Number(formData.get("factura_id")),
     producto_id: Number(formData.get("producto_id")),
-    cantidad: formData.get("cantidad"),
-    precio_unitario: formData.get("precio_unitario"),
+    cantidad: Number(formData.get("cantidad")),
+    precio_unitario: Number(formData.get("precio_unitario")),
     aplica_iva: formData.get("aplica_iva") === "on",
   };
 
