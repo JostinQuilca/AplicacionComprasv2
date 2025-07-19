@@ -19,12 +19,12 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
     useEffect(() => {
       let userData: UserData | null = null;
       try {
-        const storedData = localStorage.getItem('userData');
+        const storedData = sessionStorage.getItem('userData');
         if (storedData) {
           userData = JSON.parse(storedData);
         }
       } catch (error) {
-        console.error("Authentication check failed while parsing localStorage", error);
+        console.error("Authentication check failed while parsing sessionStorage", error);
         router.replace('/login');
         return;
       }

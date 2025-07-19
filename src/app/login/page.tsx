@@ -53,7 +53,7 @@ export default function LoginPage() {
           description: `Bienvenido, ${result.data.nombre}.`,
         });
         
-        localStorage.setItem('userData', JSON.stringify(result.data));
+        sessionStorage.setItem('userData', JSON.stringify(result.data));
 
         router.push('/');
       } else {

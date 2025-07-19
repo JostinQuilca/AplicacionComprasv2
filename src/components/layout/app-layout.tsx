@@ -28,6 +28,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ThemeToggle } from './theme-toggle';
+import { useToast } from '@/hooks/use-toast';
 
 interface UserData {
   id_usuario: number;
@@ -38,19 +39,20 @@ interface UserData {
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [userData, setUserData] = React.useState<UserData | null>(null);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
     try {
-      const storedData = localStorage.getItem('userData');
+      const storedData = sessionStorage.getItem('userData');
       if (storedData) {
         setUserData(JSON.parse(storedData));
       } else {
         router.push('/login');
       }
     } catch (error) {
-      console.error("Failed to parse user data from localStorage", error);
+      console.error("Failed to parse user data from sessionStorage", error);
       router.push('/login');
     } finally {
       setLoading(false);
@@ -58,8 +60,12 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   }, [router]);
   
   const handleLogout = () => {
-    localStorage.removeItem('userData');
+    sessionStorage.removeItem('userData');
     setUserData(null);
+    toast({
+        title: "Sesión Cerrada",
+        description: "Has cerrado sesión correctamente.",
+    });
     router.push('/login');
   };
   
