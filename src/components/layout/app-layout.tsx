@@ -71,7 +71,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     return `${firstNameInitial}${lastNameInitial}`.toUpperCase();
   };
 
-  if (loading) {
+  if (loading || !userData) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -165,34 +165,30 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             <SidebarTrigger />
             <div className="flex items-center gap-4">
               <ThemeToggle />
-              {userData ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                        <Avatar className="h-10 w-10">
-                           <AvatarFallback>{getInitials(userData.nombre)}</AvatarFallback>
-                        </Avatar>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="end" forceMount>
-                      <DropdownMenuLabel className="font-normal">
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium leading-none">{userData.nombre}</p>
-                          <p className="text-xs leading-none text-muted-foreground">
-                            {isAdministrador ? 'Administrador' : userData.nombre_rol}
-                          </p>
-                        </div>
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleLogout}>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Cerrar Sesión</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-              ) : (
-                  <Skeleton className="h-10 w-10 rounded-full" />
-              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10">
+                        <AvatarFallback>{getInitials(userData.nombre)}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{userData.nombre}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {isAdministrador ? 'Administrador' : userData.nombre_rol}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Cerrar Sesión</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </header>
         <div className="min-h-[calc(100vh-4rem)] w-full">
