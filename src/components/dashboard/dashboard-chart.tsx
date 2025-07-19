@@ -3,26 +3,15 @@
 import * as React from 'react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts"
 
-export default function DashboardChart() {
-  const [data, setData] = React.useState<any[]>([]);
+interface DashboardChartProps {
+    data: { name: string; total: number }[];
+}
 
-  React.useEffect(() => {
-    // Mock data for the chart, generated on the client to avoid hydration mismatch
-    const chartData = [
-      { name: "Ene", total: Math.floor(Math.random() * 50) + 10 },
-      { name: "Feb", total: Math.floor(Math.random() * 50) + 10 },
-      { name: "Mar", total: Math.floor(Math.random() * 50) + 10 },
-      { name: "Abr", total: Math.floor(Math.random() * 50) + 10 },
-      { name: "May", total: Math.floor(Math.random() * 50) + 10 },
-      { name: "Jun", total: Math.floor(Math.random() * 50) + 10 },
-    ];
-    setData(chartData);
-  }, []);
-
-  if (data.length === 0) {
+export default function DashboardChart({ data }: DashboardChartProps) {
+  if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-[350px]">
-        <p className="text-muted-foreground">Cargando gráfico...</p>
+        <p className="text-muted-foreground">No hay datos para mostrar en el gráfico.</p>
       </div>
     )
   }
@@ -37,13 +26,17 @@ export default function DashboardChart() {
           fontSize={12}
           tickLine={false}
           axisLine={false}
+          interval={0}
+          angle={-30}
+          textAnchor="end"
+          height={60}
         />
         <YAxis
           stroke="hsl(var(--muted-foreground))"
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => `${value}`}
+          tickFormatter={(value) => `$${new Intl.NumberFormat('es-EC').format(value as number)}`}
         />
         <Tooltip
           cursor={{ fill: 'hsl(var(--muted))' }}
@@ -51,6 +44,10 @@ export default function DashboardChart() {
             backgroundColor: 'hsl(var(--background))',
             borderColor: 'hsl(var(--border))'
           }}
+          formatter={(value: number) => [
+              `$${value.toLocaleString('es-EC', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
+              'Total Comprado'
+          ]}
         />
         <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
       </BarChart>

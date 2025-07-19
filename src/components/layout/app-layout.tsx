@@ -24,8 +24,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface UserData {
   id_usuario: number;
@@ -72,7 +73,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
         <div className="flex h-screen items-center justify-center">
-            <div className="text-lg font-semibold">Cargando...</div>
+            <div className="flex items-center space-x-2">
+                <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
+                <span className="text-lg font-semibold">Cargando...</span>
+            </div>
         </div>
     );
   }
@@ -178,7 +182,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       <SidebarInset>
           <header className="sticky top-0 z-10 flex h-16 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
             <SidebarTrigger />
-             {userData && (
+             {userData ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -203,6 +207,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+            ) : (
+                <Skeleton className="h-10 w-10 rounded-full" />
             )}
           </header>
         <div className="min-h-[calc(100vh-4rem)] w-full">
