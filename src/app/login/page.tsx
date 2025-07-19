@@ -51,7 +51,7 @@ export default function LoginPage() {
       if (result.success && result.data) {
         toast({
           title: 'Inicio de Sesión Exitoso',
-          description: `Bienvenido, ${result.data.rol_nombre}.`,
+          description: `Bienvenido, ${result.data.nombre}.`,
         });
         
         // Guardar datos del usuario en localStorage

@@ -29,9 +29,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from '@/components/ui/button';
 
 interface UserData {
+  id_usuario: number;
+  usuario: string;
   nombre: string;
-  rol_nombre: string;
-  rol_id: string;
+  nombre_rol: string;
 }
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
@@ -77,9 +78,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const userRolId = userData ? parseInt(userData.rol_id, 10) : null;
-  const isAdministrador = userRolId === 16;
-  const isGestor = userRolId === 7;
+  const isAdministrador = userData?.usuario === 'Administrador';
+  const isGestor = !isAdministrador; // Assuming anyone not admin is a gestor for now
 
   return (
     <>
@@ -203,7 +203,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">{userData.nombre}</p>
                         <p className="text-xs leading-none text-muted-foreground">
-                          {userData.rol_nombre}
+                          {userData.nombre_rol}
                         </p>
                       </div>
                     </DropdownMenuLabel>

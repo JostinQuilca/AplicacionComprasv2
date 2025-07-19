@@ -10,17 +10,22 @@ const loginSchema = z.object({
   contrasena: z.string().min(1, 'La contraseña es requerida.'),
 });
 
+type LoginUserData = {
+    id_usuario: number;
+    usuario: string;
+    nombre: string;
+    nombre_rol: string;
+}
+
 type LoginResponse = {
     token: string;
-    rol_nombre: string;
-    rol_id: string;
-    usuario: string;
-    nombre: string; 
+    usuario: LoginUserData;
+    permisos: any[];
 }
 
 export async function loginAction(
   formData: FormData
-): Promise<ActionResponse<LoginResponse>> {
+): Promise<ActionResponse<LoginUserData>> {
   const rawData = Object.fromEntries(formData);
   const validatedFields = loginSchema.safeParse(rawData);
 
@@ -54,7 +59,7 @@ export async function loginAction(
     return {
       success: true,
       message: 'Inicio de sesión exitoso.',
-      data: loginData,
+      data: loginData.usuario,
     };
   } catch (error) {
     console.error('Login action error:', error);
