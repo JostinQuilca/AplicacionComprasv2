@@ -13,11 +13,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-<<<<<<< HEAD
 } from "@/components/ui/command"
-=======
-} from "@/components/ui/command";
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
 
 export type ComboboxOption = {
   value: string;
@@ -70,13 +66,8 @@ export function Combobox({
                 key={option.value}
                 value={option.label}
                 onSelect={() => {
-<<<<<<< HEAD
                   onChange(option.value)
                   setOpen(false)
-=======
-                  onChange(option.value);
-                  setOpen(false);
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
                 }}
               >
                 <Check
@@ -92,10 +83,5 @@ export function Combobox({
         </CommandList>
       </CommandDialog>
     </>
-<<<<<<< HEAD
   )
 }
-=======
-  );
-}
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0

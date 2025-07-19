@@ -27,7 +27,7 @@ import FacturaFormModal from "./factura-form-modal";
 import CancelFacturaDialog from "./cancel-factura-dialog";
 import { cancelFactura } from "@/app/facturas/actions";
 import { Card } from "../ui/card";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 
 type FacturaConNombre = FacturaCompra & { nombre_proveedor: string };
 type SortKey = keyof FacturaConNombre | "id";
@@ -39,10 +39,9 @@ interface FacturasClientProps {
 }
 
 const formatUTCDate = (dateString: string | null) => {
-<<<<<<< HEAD
     if (!dateString) return 'N/A';
     try {
-        const date = parseISO(dateString);
+        const date = new Date(dateString);
         return format(date, 'dd/MM/yyyy');
     } catch (error) {
         console.error("Invalid date string:", dateString, error);
@@ -69,49 +68,6 @@ const getBadgeClassName = (estado: FacturaCompra['estado']) => {
 };
 
 export default function FacturasClient({ initialFacturas, initialProveedores }: FacturasClientProps) {
-=======
-  if (!dateString) return "N/A";
-  try {
-    const date = parseISO(dateString);
-    const userTimezoneOffset = date.getTimezoneOffset() * 60000;
-    return format(new Date(date.getTime() + userTimezoneOffset), "dd/MM/yyyy");
-  } catch (error) {
-    console.error("Invalid date string:", dateString, error);
-    return "Fecha inválida";
-  }
-};
-
-const getBadgeVariant = (estado: FacturaCompra["estado"]) => {
-  switch (estado) {
-    case "Impresa":
-      return "default";
-    case "Registrada":
-      return "secondary";
-    case "Cancelada":
-      return "destructive";
-    default:
-      return "outline";
-  }
-};
-
-const getBadgeClassName = (estado: FacturaCompra["estado"]) => {
-  switch (estado) {
-    case "Impresa":
-      return "bg-blue-100 text-blue-800";
-    case "Registrada":
-      return "bg-yellow-100 text-yellow-800";
-    case "Cancelada":
-      return "bg-red-100 text-red-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-};
-
-export default function FacturasClient({
-  initialFacturas,
-  initialProveedores,
-}: FacturasClientProps) {
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
   const [data, setData] = React.useState<FacturaConNombre[]>(initialFacturas);
   const [proveedores] = React.useState<Proveedor[]>(initialProveedores);
 
@@ -129,12 +85,6 @@ export default function FacturasClient({
   const [cancelingFactura, setCancelingFactura] =
     React.useState<FacturaConNombre | null>(null);
 
-<<<<<<< HEAD
-  const [isCancelDialogOpen, setCancelDialogOpen] = React.useState(false);
-  const [cancelingFactura, setCancelingFactura] = React.useState<FacturaConNombre | null>(null);
-  
-=======
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 10;
 
@@ -210,11 +160,7 @@ export default function FacturasClient({
     setEditingFactura(null);
     setModalOpen(true);
   };
-<<<<<<< HEAD
   
-=======
-
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
   const handleOpenCancelDialog = (factura: FacturaConNombre) => {
     setCancelingFactura(factura);
     setCancelDialogOpen(true);
@@ -222,15 +168,9 @@ export default function FacturasClient({
 
   const handleCancelConfirm = async () => {
     if (!cancelingFactura) return;
-<<<<<<< HEAD
     
     const result = await cancelFactura(cancelingFactura.id);
     if(result.success) {
-=======
-
-    const result = await cancelFactura(cancelingFactura.id);
-    if (result.success) {
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
       toast({ title: "Éxito", description: result.message });
     } else {
       toast({
@@ -301,7 +241,6 @@ export default function FacturasClient({
             <TableBody>
               {paginatedData.length > 0 ? (
                 paginatedData.map((item) => {
-<<<<<<< HEAD
                   const isModificationDisabled = item.estado === 'Impresa' || item.estado === 'Cancelada';
                   return (
                     <TableRow key={item.id}>
@@ -328,71 +267,11 @@ export default function FacturasClient({
                       <TableCell>
                         <Badge variant={getBadgeVariant(item.estado)} 
                                className={getBadgeClassName(item.estado)}>
-=======
-                  const isModificationDisabled =
-                    item.estado === "Impresa" || item.estado === "Cancelada";
-                  return (
-                    <TableRow key={item.id}>
-                      <TableCell className="flex items-center gap-1">
-                        <Button
-                          asChild
-                          variant="ghost"
-                          size="icon"
-                          title="Ver Factura"
-                        >
-                          <Link href={`/facturas/vista?factura_id=${item.id}`}>
-                            <Eye className="h-5 w-5 text-blue-600" />
-                          </Link>
-                        </Button>
-                        <Button
-                          asChild
-                          variant="ghost"
-                          size="icon"
-                          title="Editar Factura"
-                          disabled={isModificationDisabled}
-                        >
-                          <Link
-                            href={`/detalles-factura?factura_id=${item.id}`}
-                          >
-                            <Pencil className="h-5 w-5" />
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleOpenCancelDialog(item)}
-                          title="Cancelar Factura"
-                          disabled={isModificationDisabled}
-                        >
-                          <Ban className="h-5 w-5 text-destructive" />
-                        </Button>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {item.numero_factura_proveedor}
-                      </TableCell>
-                      <TableCell>{item.nombre_proveedor}</TableCell>
-                      <TableCell>{formatUTCDate(item.fecha_emision)}</TableCell>
-                      <TableCell>
-                        {formatUTCDate(item.fecha_vencimiento)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        ${item.total.toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={getBadgeVariant(item.estado)}
-                          className={getBadgeClassName(item.estado)}
-                        >
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
                           {item.estado}
                         </Badge>
                       </TableCell>
                     </TableRow>
-<<<<<<< HEAD
                   )
-=======
-                  );
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
                 })
               ) : (
                 <TableRow>
@@ -435,11 +314,7 @@ export default function FacturasClient({
         factura={editingFactura}
         proveedores={proveedores}
       />
-<<<<<<< HEAD
       
-=======
-
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
       <CancelFacturaDialog
         isOpen={isCancelDialogOpen}
         setIsOpen={setCancelDialogOpen}

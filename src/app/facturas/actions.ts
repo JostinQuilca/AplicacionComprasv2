@@ -2,17 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { FacturaCompra, FacturaCompraSchema } from "@/lib/types";
-<<<<<<< HEAD
 import { format } from 'date-fns';
 import { formatZodErrors, handleApiError, type ActionResponse } from "@/lib/actions-utils";
-=======
-import { format } from "date-fns";
-import {
-  formatZodErrors,
-  handleApiError,
-  type ActionResponse,
-} from "@/lib/actions-utils";
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
 import { getFacturas } from "@/lib/data";
 
 const API_URL = "https://modulocompras.onrender.com/api/facturas";
@@ -44,7 +35,6 @@ export async function addFactura(
       message: formatZodErrors(validatedFields.error),
     };
   }
-<<<<<<< HEAD
   
   // Check for duplicate invoice number for the same provider
   const { proveedor_cedula_ruc, numero_factura_proveedor } = validatedFields.data;
@@ -52,18 +42,6 @@ export async function addFactura(
     const allFacturas = await getFacturas();
     const existingFactura = allFacturas.find(
       f => f.proveedor_cedula_ruc === proveedor_cedula_ruc && f.numero_factura_proveedor === numero_factura_proveedor
-=======
-
-  // Check for duplicate invoice number for the same provider
-  const { proveedor_cedula_ruc, numero_factura_proveedor } =
-    validatedFields.data;
-  try {
-    const allFacturas = await getFacturas();
-    const existingFactura = allFacturas.find(
-      (f) =>
-        f.proveedor_cedula_ruc === proveedor_cedula_ruc &&
-        f.numero_factura_proveedor === numero_factura_proveedor
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
     );
 
     if (existingFactura) {
@@ -73,14 +51,7 @@ export async function addFactura(
       };
     }
   } catch (error) {
-<<<<<<< HEAD
      return { success: false, message: "Error al verificar facturas existentes." };
-=======
-    return {
-      success: false,
-      message: "Error al verificar facturas existentes.",
-    };
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
   }
 
   const dataToSubmit = {
@@ -153,7 +124,6 @@ export async function updateFactura(
   }
 
   // Check for duplicate invoice number for the same provider, excluding the current invoice
-<<<<<<< HEAD
   const { proveedor_cedula_ruc, numero_factura_proveedor } = validatedFields.data;
   try {
       const allFacturas = await getFacturas();
@@ -174,32 +144,6 @@ export async function updateFactura(
   }
 
 
-=======
-  const { proveedor_cedula_ruc, numero_factura_proveedor } =
-    validatedFields.data;
-  try {
-    const allFacturas = await getFacturas();
-    const existingFactura = allFacturas.find(
-      (f) =>
-        f.id !== id &&
-        f.proveedor_cedula_ruc === proveedor_cedula_ruc &&
-        f.numero_factura_proveedor === numero_factura_proveedor
-    );
-
-    if (existingFactura) {
-      return {
-        success: false,
-        message: `Ya existe otra factura con el número "${numero_factura_proveedor}" para este proveedor.`,
-      };
-    }
-  } catch (error) {
-    return {
-      success: false,
-      message: "Error al verificar facturas existentes.",
-    };
-  }
-
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
   const dataToSubmit = {
     ...validatedFields.data,
     fecha_emision: format(validatedFields.data.fecha_emision, "yyyy-MM-dd"),
@@ -225,17 +169,10 @@ export async function updateFactura(
     revalidatePath("/facturas");
     revalidatePath(`/detalles-factura?factura_id=${id}`);
     revalidatePath(`/facturas/vista?factura_id=${id}`);
-<<<<<<< HEAD
     return { 
         success: true, 
         message: "Factura actualizada con éxito.",
         data: updatedFactura,
-=======
-    return {
-      success: true,
-      message: "Factura actualizada con éxito.",
-      data: updatedFactura,
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
     };
   } catch (error: unknown) {
     return {
@@ -253,7 +190,6 @@ export async function cancelFactura(id: number): Promise<ActionResponse> {
   try {
     const res = await fetch(`${API_URL}/${id}`);
     if (!res.ok) {
-<<<<<<< HEAD
       await handleApiError(res, 'Error al obtener los datos de la factura para cancelar.');
     }
     currentFactura = await res.json();
@@ -286,53 +222,6 @@ export async function cancelFactura(id: number): Promise<ActionResponse> {
          : null,
        usuario_modificacion: 1,
    };
-=======
-      await handleApiError(
-        res,
-        "Error al obtener los datos de la factura para cancelar."
-      );
-    }
-    currentFactura = await res.json();
-  } catch (error) {
-    return {
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Ocurrió un error al buscar la factura.",
-    };
-  }
-
-  const validatedFields = FacturaCompraSchema.safeParse({
-    ...currentFactura,
-    subtotal: parseFloat(currentFactura.subtotal) || 0,
-    iva: parseFloat(currentFactura.iva) || 0,
-    total: parseFloat(currentFactura.total) || 0,
-    fecha_emision: new Date(currentFactura.fecha_emision),
-    fecha_vencimiento: currentFactura.fecha_vencimiento
-      ? new Date(currentFactura.fecha_vencimiento)
-      : null,
-    estado: "Cancelada",
-  });
-
-  if (!validatedFields.success) {
-    return {
-      success: false,
-      message:
-        "Los datos de la factura existente son inválidos. " +
-        formatZodErrors(validatedFields.error),
-    };
-  }
-
-  const finalDataToSubmit = {
-    ...validatedFields.data,
-    fecha_emision: format(validatedFields.data.fecha_emision, "yyyy-MM-dd"),
-    fecha_vencimiento: validatedFields.data.fecha_vencimiento
-      ? format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd")
-      : null,
-    usuario_modificacion: 1,
-  };
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
 
   try {
     const response = await fetch(`${API_URL}/${id}`, {
@@ -342,37 +231,18 @@ export async function cancelFactura(id: number): Promise<ActionResponse> {
     });
 
     if (!response.ok) {
-<<<<<<< HEAD
       await handleApiError(response, 'Error al cancelar la factura.');
-=======
-      await handleApiError(response, "Error al cancelar la factura.");
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
     }
     
     revalidatePath("/facturas");
     revalidatePath(`/detalles-factura?factura_id=${id}`);
     revalidatePath(`/facturas/vista?factura_id=${id}`);
-<<<<<<< HEAD
     return { 
         success: true, 
         message: "Factura cancelada con éxito.",
     };
   } catch (error: unknown) {
      return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
-=======
-    return {
-      success: true,
-      message: "Factura cancelada con éxito.",
-    };
-  } catch (error: unknown) {
-    return {
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Ocurrió un error desconocido.",
-    };
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
   }
 }
 
@@ -381,7 +251,6 @@ export async function printFactura(id: number): Promise<ActionResponse> {
   try {
     const res = await fetch(`${API_URL}/${id}`);
     if (!res.ok) {
-<<<<<<< HEAD
       await handleApiError(res, 'Error al obtener los datos de la factura para imprimir.');
     }
     currentFactura = await res.json();
@@ -414,53 +283,6 @@ export async function printFactura(id: number): Promise<ActionResponse> {
          : null,
        usuario_modificacion: 1,
    };
-=======
-      await handleApiError(
-        res,
-        "Error al obtener los datos de la factura para imprimir."
-      );
-    }
-    currentFactura = await res.json();
-  } catch (error) {
-    return {
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Ocurrió un error al buscar la factura.",
-    };
-  }
-
-  const validatedFields = FacturaCompraSchema.safeParse({
-    ...currentFactura,
-    subtotal: parseFloat(currentFactura.subtotal) || 0,
-    iva: parseFloat(currentFactura.iva) || 0,
-    total: parseFloat(currentFactura.total) || 0,
-    fecha_emision: new Date(currentFactura.fecha_emision),
-    fecha_vencimiento: currentFactura.fecha_vencimiento
-      ? new Date(currentFactura.fecha_vencimiento)
-      : null,
-    estado: "Impresa",
-  });
-
-  if (!validatedFields.success) {
-    return {
-      success: false,
-      message:
-        "Los datos de la factura existente son inválidos. " +
-        formatZodErrors(validatedFields.error),
-    };
-  }
-
-  const finalDataToSubmit = {
-    ...validatedFields.data,
-    fecha_emision: format(validatedFields.data.fecha_emision, "yyyy-MM-dd"),
-    fecha_vencimiento: validatedFields.data.fecha_vencimiento
-      ? format(validatedFields.data.fecha_vencimiento, "yyyy-MM-dd")
-      : null,
-    usuario_modificacion: 1,
-  };
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
 
   try {
     const response = await fetch(`${API_URL}/${id}`, {
@@ -470,7 +292,6 @@ export async function printFactura(id: number): Promise<ActionResponse> {
     });
 
     if (!response.ok) {
-<<<<<<< HEAD
       await handleApiError(response, 'Error al cambiar el estado de la factura a Impresa.');
     }
     
@@ -483,28 +304,5 @@ export async function printFactura(id: number): Promise<ActionResponse> {
     };
   } catch (error: unknown) {
      return { success: false, message: error instanceof Error ? error.message : "Ocurrió un error desconocido." };
-=======
-      await handleApiError(
-        response,
-        "Error al cambiar el estado de la factura a Impresa."
-      );
-    }
-
-    revalidatePath("/facturas");
-    revalidatePath(`/detalles-factura?factura_id=${id}`);
-    revalidatePath(`/facturas/vista?factura_id=${id}`);
-    return {
-      success: true,
-      message: "Factura marcada como Impresa.",
-    };
-  } catch (error: unknown) {
-    return {
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Ocurrió un error desconocido.",
-    };
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
   }
 }

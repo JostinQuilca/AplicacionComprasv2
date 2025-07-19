@@ -6,11 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-<<<<<<< HEAD
 import { useRouter } from 'next/navigation';
-=======
-import { useRouter } from "next/navigation";
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
 import { CalendarIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -59,16 +55,7 @@ interface FacturaFormModalProps {
 
 type FacturaFormData = z.infer<typeof FacturaCompraSchema>;
 
-<<<<<<< HEAD
 export default function FacturaFormModal({ isOpen, setIsOpen, factura, proveedores }: FacturaFormModalProps) {
-=======
-export default function FacturaFormModal({
-  isOpen,
-  setIsOpen,
-  factura,
-  proveedores,
-}: FacturaFormModalProps) {
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
   const isEditMode = !!factura;
   const { toast } = useToast();
   const router = useRouter();
@@ -88,11 +75,7 @@ export default function FacturaFormModal({
       total: 0,
     },
   });
-<<<<<<< HEAD
   
-=======
-
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
   const { reset, watch } = form;
   const fechaEmision = watch("fecha_emision");
 
@@ -101,14 +84,8 @@ export default function FacturaFormModal({
       if (factura && isEditMode) {
         reset({
           ...factura,
-          fecha_emision: parseISO(factura.fecha_emision),
-<<<<<<< HEAD
-          fecha_vencimiento: factura.fecha_vencimiento ? parseISO(factura.fecha_vencimiento) : null,
-=======
-          fecha_vencimiento: factura.fecha_vencimiento
-            ? parseISO(factura.fecha_vencimiento)
-            : null,
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
+          fecha_emision: new Date(factura.fecha_emision),
+          fecha_vencimiento: factura.fecha_vencimiento ? new Date(factura.fecha_vencimiento) : null,
         });
       } else {
         reset({
@@ -128,11 +105,10 @@ export default function FacturaFormModal({
 
   const onSubmit = (data: FacturaFormData) => {
     startTransition(async () => {
-<<<<<<< HEAD
         const formData = new FormData();
         Object.entries(data).forEach(([key, value]) => {
             if (value instanceof Date) {
-              formData.append(key, format(value, "yyyy-MM-dd"));
+              formData.append(key, value.toISOString().split('T')[0]); // Send YYYY-MM-DD
             } else if (value !== null && value !== undefined) {
               formData.append(key, String(value));
             }
@@ -140,26 +116,10 @@ export default function FacturaFormModal({
       
       try {
         const action = isEditMode ? updateFactura.bind(null, factura!.id) : addFactura;
-=======
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (value instanceof Date) {
-          formData.append(key, format(value, "yyyy-MM-dd"));
-        } else if (value !== null && value !== undefined) {
-          formData.append(key, String(value));
-        }
-      });
-
-      try {
-        const action = isEditMode
-          ? updateFactura.bind(null, factura!.id)
-          : addFactura;
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
         const result = await action(null, formData);
 
         if (result.success) {
           if (!isEditMode && result.data?.id) {
-<<<<<<< HEAD
             toast({ title: "Factura Creada", description: "Ahora puede añadir los detalles." });
             setIsOpen(false);
             router.push(`/detalles-factura?factura_id=${result.data.id}`);
@@ -173,37 +133,6 @@ export default function FacturaFormModal({
       } catch (error) {
           console.error(error);
           toast({ title: "Error Inesperado", description: `Ocurrió un error guardando la factura: ${error instanceof Error ? error.message : 'Error desconocido'}`, variant: "destructive" });
-=======
-            toast({
-              title: "Factura Creada",
-              description: "Ahora puede añadir los detalles.",
-            });
-            setIsOpen(false);
-            router.push(`/detalles-factura?factura_id=${result.data.id}`);
-          } else {
-            toast({
-              title: "Actualización Exitosa",
-              description: result.message,
-            });
-            setIsOpen(false);
-          }
-        } else {
-          toast({
-            title: "Error",
-            description: result.message,
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error(error);
-        toast({
-          title: "Error Inesperado",
-          description: `Ocurrió un error guardando la factura: ${
-            error instanceof Error ? error.message : "Error desconocido"
-          }`,
-          variant: "destructive",
-        });
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
       }
     });
   };
@@ -212,7 +141,6 @@ export default function FacturaFormModal({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-<<<<<<< HEAD
           <DialogTitle>{isEditMode ? "Editar Encabezado de Factura" : "Añadir Nueva Factura"}</DialogTitle>
           <DialogDescription>
             {isEditMode ? "Actualice los detalles del encabezado de la factura." : "Ingrese los detalles principales de la nueva factura."}
@@ -220,25 +148,6 @@ export default function FacturaFormModal({
         </DialogHeader>
         <Form {...form}>
           <form id="factura-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-=======
-          <DialogTitle>
-            {isEditMode
-              ? "Editar Encabezado de Factura"
-              : "Añadir Nueva Factura"}
-          </DialogTitle>
-          <DialogDescription>
-            {isEditMode
-              ? "Actualice los detalles del encabezado de la factura."
-              : "Ingrese los detalles principales de la nueva factura."}
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form
-            id="factura-form"
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
-          >
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
             <FormField
               control={form.control}
               name="proveedor_cedula_ruc"
@@ -252,15 +161,7 @@ export default function FacturaFormModal({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-<<<<<<< HEAD
                       {proveedores.map(p => <SelectItem key={p.cedula_ruc} value={p.cedula_ruc}>{p.nombre}</SelectItem>)}
-=======
-                      {proveedores.map((p) => (
-                        <SelectItem key={p.cedula_ruc} value={p.cedula_ruc}>
-                          {p.nombre}
-                        </SelectItem>
-                      ))}
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -281,60 +182,6 @@ export default function FacturaFormModal({
               )}
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-<<<<<<< HEAD
-               {isEditMode ? (
-                  <FormField
-                    control={form.control}
-                    name="fecha_emision"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Fecha de Emisión</FormLabel>
-                        <Popover modal={true}>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value ? format(field.value, "PPP", { locale: es }) : <span>Elija una fecha</span>}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value as Date}
-                              onSelect={field.onChange}
-                              disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                              initialFocus
-                              locale={es}
-                              formatters={{ formatWeekdayName: (day) => format(day, 'cccccc', { locale: es }).charAt(0).toUpperCase() }}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ) : (
-                    <FormItem>
-                        <FormLabel>Fecha de Emisión</FormLabel>
-                        <FormControl>
-                        <Input
-                            value={format(new Date(), "PPP", { locale: es })}
-                            disabled
-                            className="cursor-default"
-                        />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-=======
-              {isEditMode ? (
                 <FormField
                   control={form.control}
                   name="fecha_emision"
@@ -350,12 +197,9 @@ export default function FacturaFormModal({
                                 "pl-3 text-left font-normal",
                                 !field.value && "text-muted-foreground"
                               )}
+                              disabled={!isEditMode}
                             >
-                              {field.value ? (
-                                format(field.value, "PPP", { locale: es })
-                              ) : (
-                                <span>Elija una fecha</span>
-                              )}
+                              {field.value ? format(field.value, "PPP", { locale: es }) : <span>Elija una fecha</span>}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
@@ -365,17 +209,10 @@ export default function FacturaFormModal({
                             mode="single"
                             selected={field.value as Date}
                             onSelect={field.onChange}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
+                            disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                             initialFocus
                             locale={es}
-                            formatters={{
-                              formatWeekdayName: (day) =>
-                                format(day, "cccccc", { locale: es })
-                                  .charAt(0)
-                                  .toUpperCase(),
-                            }}
+                            formatters={{ formatWeekdayName: (day) => format(day, 'cccccc', { locale: es }).charAt(0).toUpperCase() }}
                           />
                         </PopoverContent>
                       </Popover>
@@ -383,20 +220,6 @@ export default function FacturaFormModal({
                     </FormItem>
                   )}
                 />
-              ) : (
-                <FormItem>
-                  <FormLabel>Fecha de Emisión</FormLabel>
-                  <FormControl>
-                    <Input
-                      value={format(new Date(), "PPP", { locale: es })}
-                      disabled
-                      className="cursor-default"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
               <FormField
                 control={form.control}
                 name="fecha_vencimiento"
@@ -413,15 +236,7 @@ export default function FacturaFormModal({
                               !field.value && "text-muted-foreground"
                             )}
                           >
-<<<<<<< HEAD
                             {field.value ? format(field.value, "PPP", { locale: es }) : <span>Elija una fecha</span>}
-=======
-                            {field.value ? (
-                              format(field.value, "PPP", { locale: es })
-                            ) : (
-                              <span>Elija una fecha</span>
-                            )}
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -434,16 +249,7 @@ export default function FacturaFormModal({
                           disabled={{ before: fechaEmision }}
                           initialFocus
                           locale={es}
-<<<<<<< HEAD
                           formatters={{ formatWeekdayName: (day) => format(day, 'cccccc', { locale: es }).charAt(0).toUpperCase() }}
-=======
-                          formatters={{
-                            formatWeekdayName: (day) =>
-                              format(day, "cccccc", { locale: es })
-                                .charAt(0)
-                                .toUpperCase(),
-                          }}
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
                         />
                       </PopoverContent>
                     </Popover>
@@ -474,51 +280,13 @@ export default function FacturaFormModal({
                   </FormItem>
                 )}
               />
-<<<<<<< HEAD
-              {isEditMode ? (
-                <FormField
-                  control={form.control}
-                  name="estado"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccione un estado" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Registrada">Registrada</SelectItem>
-                          <SelectItem value="Impresa">Impresa</SelectItem>
-                          <SelectItem value="Cancelada">Cancelada</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ) : (
-                 <FormItem>
-                    <FormLabel>Estado</FormLabel>
-                    <FormControl>
-                    <Input
-                        value="Registrada"
-                        disabled
-                        className="cursor-default"
-                    />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-              )}
-=======
               <FormField
                 control={form.control}
                 name="estado"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Estado</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!isEditMode}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un estado" />
@@ -534,30 +302,13 @@ export default function FacturaFormModal({
                   </FormItem>
                 )}
               />
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
             </div>
           </form>
         </Form>
         <DialogFooter className="pt-4 border-t">
-<<<<<<< HEAD
           <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
           <Button type="submit" form="factura-form" disabled={isSaving}>
             {isSaving ? "Guardando..." : (isEditMode ? "Guardar Cambios" : "Crear y Continuar")}
-=======
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setIsOpen(false)}
-          >
-            Cancelar
-          </Button>
-          <Button type="submit" form="factura-form" disabled={isSaving}>
-            {isSaving
-              ? "Guardando..."
-              : isEditMode
-              ? "Guardar Cambios"
-              : "Crear y Continuar"}
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
           </Button>
         </DialogFooter>
       </DialogContent>

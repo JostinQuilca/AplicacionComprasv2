@@ -93,7 +93,6 @@ export const FacturaDetalleSchema = z.object({
 });
 
 export type FacturaDetalle = {
-<<<<<<< HEAD
     id: number;
     factura_id: number;
     producto_id: number;
@@ -117,29 +116,4 @@ export type AuditoriaLog = {
     details: Record<string, any>;
     timestamp: string;
     nombre_rol: string;
-=======
-  id: number;
-  factura_id: number;
-  producto_id: number;
-  nombre_producto: string;
-  cantidad: number;
-  precio_unitario: number;
-  aplica_iva: boolean;
-  subtotal: number;
-  iva: number;
-  total: number;
-  usuario_creacion?: number;
-  fecha_creacion?: string;
-};
-
-export type AuditoriaLog = {
-  id: number;
-  accion: string;
-  modulo: string;
-  tabla: string;
-  id_usuario: number | null;
-  details: Record<string, any>;
-  timestamp: string;
-  nombre_rol: string;
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
 };

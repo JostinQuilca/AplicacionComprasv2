@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -7,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useTransition } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -58,7 +57,7 @@ export default function FacturaVistaClient({ factura, detalles, productos }: Fac
     const formatUTCDate = (dateString: string | null | undefined) => {
         if (!dateString) return 'N/A';
         try {
-            const date = parseISO(dateString);
+            const date = new Date(dateString);
             return format(date, "dd MMMM, yyyy", { locale: es });
         } catch (error) {
             return 'Fecha inválida';
@@ -75,7 +74,6 @@ export default function FacturaVistaClient({ factura, detalles, productos }: Fac
     };
 
     const productoMap = new Map(productos.map(p => [p.id_producto, p.codigo]));
-    const isModificationDisabled = factura.estado === 'Impresa' || factura.estado === 'Cancelada';
 
     return (
         <main className="flex flex-1 flex-col items-center gap-4 p-4 md:gap-8 md:p-8">

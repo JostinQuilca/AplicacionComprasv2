@@ -98,15 +98,9 @@ export default function DetalleFacturaFormModal({
   const onSubmit = (data: DetalleFormData) => {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
-<<<<<<< HEAD
       if (key === 'aplica_iva') {
           // Only append 'on' if it's true, otherwise don't append
           if (value === true) formData.append(key, 'on');
-=======
-      if (key === "aplica_iva") {
-        // Only append 'on' if it's true, otherwise don't append
-        if (value === true) formData.append(key, "on");
->>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
       } else if (value !== null && value !== undefined) {
         formData.append(key, String(value));
       }
