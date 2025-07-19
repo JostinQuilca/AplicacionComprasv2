@@ -1,8 +1,42 @@
+
+"use client";
+
 import AuditoriaClient from '@/components/auditoria/auditoria-client';
 import { getAuditoriaLogs } from '@/lib/data';
+import withAuth from '@/components/layout/withAuth';
+import { useEffect, useState } from 'react';
+import type { AuditoriaLog } from '@/lib/types';
 
-export default async function AuditoriaPage() {
-  const logs = await getAuditoriaLogs();
+function AuditoriaPage() {
+  const [logs, setLogs] = useState<AuditoriaLog[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadLogs() {
+      try {
+        const fetchedLogs = await getAuditoriaLogs();
+        setLogs(fetchedLogs);
+      } catch (error) {
+        console.error("Failed to fetch audit logs", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadLogs();
+  }, []);
+
+  if (loading) {
+    return (
+      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+        <div className="flex items-center">
+          <h1 className="text-lg font-semibold md:text-2xl">Registros de Auditoría</h1>
+        </div>
+        <div className="flex flex-1 items-center justify-center">
+          <p>Cargando registros...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
@@ -13,3 +47,5 @@ export default async function AuditoriaPage() {
     </main>
   );
 }
+
+export default withAuth(AuditoriaPage);
