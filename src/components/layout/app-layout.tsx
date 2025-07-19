@@ -175,16 +175,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             )}
           </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter>
-            <SidebarMenu>
-                 <SidebarMenuItem>
-                    <SidebarMenuButton onClick={handleLogout} tooltip="Cerrar Sesión">
-                        <LogOut />
-                        Cerrar Sesión
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
-        </SidebarFooter>
       </Sidebar>
       <SidebarInset>
           <header className="sticky top-0 z-10 flex h-16 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
@@ -224,14 +214,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   );
 }
 
-function AppLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <SidebarProvider>
-      <LayoutContent>{children}</LayoutContent>
-    </SidebarProvider>
-  );
-}
-
 export default function AppLayoutClient({
   children,
 }: Readonly<{
@@ -240,5 +222,9 @@ export default function AppLayoutClient({
   const pathname = usePathname();
   const isLoginPage = pathname === '/login';
 
-  return isLoginPage ? <>{children}</> : <AppLayout>{children}</AppLayout>;
+  return (
+    <SidebarProvider>
+      {isLoginPage ? <>{children}</> : <LayoutContent>{children}</LayoutContent>}
+    </SidebarProvider>
+  );
 }
