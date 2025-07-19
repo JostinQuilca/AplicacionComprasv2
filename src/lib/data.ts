@@ -47,11 +47,7 @@ export async function getProveedores(): Promise<Proveedor[]> {
     console.error("API response for proveedores is not an array:", data);
     return [];
   }
-  // Ensure fecha_creacion is a string for sorting, matching dashboard logic
-  return data.map((p) => ({
-    ...p,
-    fecha_creacion: p.fecha_creacion || new Date(0).toISOString(),
-  }));
+  return data;
 }
 
 export async function getFacturas(): Promise<FacturaCompra[]> {
