@@ -148,14 +148,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Pagos a Proveedores">
-                    <Link href="/pagos">
-                      <DollarSign />
-                      Pagos a Proveedores
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="Auditoría">
                     <Link href="/auditoria">
                       <ShieldCheck />
