@@ -103,7 +103,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Dashboard">
-                <Link href="/">
+                <Link href="/dashboard">
                   <Home />
                   Dashboard
                 </Link>

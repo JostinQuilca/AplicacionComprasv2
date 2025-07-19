@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -55,7 +56,7 @@ export default function LoginPage() {
         
         sessionStorage.setItem('userData', JSON.stringify(result.data));
 
-        router.push('/');
+        router.push('/dashboard');
       } else {
         toast({
           title: 'Error de Inicio de Sesión',

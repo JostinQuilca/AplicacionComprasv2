@@ -29,10 +29,12 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
         return;
       }
       
+      // Check if the user is 'Administrador' based on the username
       if (userData && userData.usuario === 'Administrador') {
         setIsAuthorized(true);
       } else {
-        router.replace(userData ? '/' : '/login');
+        // If not authorized, redirect. Redirect to login if no user data, else to dashboard.
+        router.replace(userData ? '/dashboard' : '/login');
       }
 
     }, [router]);
@@ -40,7 +42,10 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
     if (!isAuthorized) {
       return (
         <div className="flex h-screen items-center justify-center">
-          <div className="text-lg font-semibold">Verificando acceso...</div>
+          <div className="flex flex-col items-center gap-4">
+             <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
+             <span className="text-lg font-semibold">Verificando acceso...</span>
+          </div>
         </div>
       );
     }
