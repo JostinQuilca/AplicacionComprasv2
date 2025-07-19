@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -190,7 +191,7 @@ export default function ProveedoresClient({ initialData }: { initialData: Provee
                     <TableCell>{item.ciudad}</TableCell>
                     <TableCell>{item.tipo_proveedor}</TableCell>
                     <TableCell>
-                      <Badge variant={item.estado ? "default" : "secondary"} className={item.estado ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                      <Badge variant={item.estado ? "default" : "secondary"} className={item.estado ? "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300" : "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"}>
                         {item.estado ? "Activo" : "Inactivo"}
                       </Badge>
                     </TableCell>

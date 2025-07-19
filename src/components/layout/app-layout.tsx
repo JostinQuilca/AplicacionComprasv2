@@ -72,17 +72,16 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-        <div className="flex h-screen items-center justify-center">
-            <div className="flex items-center space-x-2">
-                <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
-                <span className="text-lg font-semibold">Cargando...</span>
-            </div>
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
+          <span className="text-lg font-semibold text-foreground">Cargando...</span>
         </div>
+      </div>
     );
   }
-
+  
   const isAdministrador = userData?.usuario === 'Administrador';
-  const isGestor = !isAdministrador;
 
   return (
     <>
@@ -103,43 +102,40 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            {(isAdministrador || isGestor) && (
-              <>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Proveedores">
-                    <Link href="/proveedores">
-                      <Users />
-                      Proveedores
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Facturas">
-                    <Link href="/facturas">
-                      <FileText />
-                      Facturas
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Reportes">
-                    <Link href="/reportes/productos">
-                      <ClipboardList />
-                      Reportes
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Saldos de Proveedor">
-                    <Link href="/saldos">
-                      <Scale />
-                      Saldos de Proveedor
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </>
-            )}
-            
+           
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Proveedores">
+                <Link href="/proveedores">
+                  <Users />
+                  Proveedores
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Facturas">
+                <Link href="/facturas">
+                  <FileText />
+                  Facturas
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Reportes">
+                <Link href="/reportes/productos">
+                  <ClipboardList />
+                  Reportes
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Saldos de Proveedor">
+                <Link href="/saldos">
+                  <Scale />
+                  Saldos de Proveedor
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+              
             {isAdministrador && (
               <>
                 <SidebarMenuItem>
