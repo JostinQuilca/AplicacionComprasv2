@@ -1,6 +1,8 @@
 import ProveedoresClient from '@/components/proveedores/proveedores-client';
 import { getProveedores } from '@/lib/data';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ProveedoresPage() {
   const proveedores = await getProveedores();
 

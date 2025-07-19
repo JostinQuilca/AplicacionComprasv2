@@ -1,8 +1,9 @@
-
 import { getFacturas, getProductos, getDetalles, getProveedores } from '@/lib/data';
 import ReporteProductosClient from '@/components/reportes/reporte-productos-client';
 import { Suspense } from 'react';
 import ReportesProductosLoading from './loading';
+
+export const dynamic = 'force-dynamic';
 
 async function ReportesProductosData() {
   const [facturasData, productos, detalles, proveedores] = await Promise.all([

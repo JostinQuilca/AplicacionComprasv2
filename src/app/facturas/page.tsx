@@ -1,6 +1,8 @@
 import FacturasClient from "@/components/facturas/facturas-client";
 import { getFacturas, getProveedores, getProductos } from "@/lib/data";
 
+export const dynamic = 'force-dynamic';
+
 export default async function FacturasPage() {
   const [facturasData, proveedoresData, productosData] = await Promise.all([
     getFacturas(),

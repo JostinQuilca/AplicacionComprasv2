@@ -8,6 +8,8 @@ import DashboardChart from '@/components/dashboard/dashboard-chart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { subDays, isWithinInterval } from 'date-fns';
 
+export const dynamic = 'force-dynamic';
+
 async function DashboardData() {
   const [proveedores, facturas] = await Promise.all([
     getProveedores(),

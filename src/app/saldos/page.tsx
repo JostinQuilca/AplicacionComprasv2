@@ -2,6 +2,8 @@ import SaldosProveedorClient from '@/components/saldos/saldos-proveedor-client';
 import { getProveedores, getFacturas } from '@/lib/data';
 import { Suspense } from 'react';
 
+export const dynamic = 'force-dynamic';
+
 function SaldosSkeleton() {
   // Puedes crear un skeleton más detallado si lo deseas
   return <div>Cargando...</div>;
