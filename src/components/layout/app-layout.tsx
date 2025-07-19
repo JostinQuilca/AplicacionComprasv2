@@ -32,6 +32,7 @@ import { Button } from '@/components/ui/button';
 interface UserData {
   nombre: string;
   rol_nombre: string;
+  rol_id: string;
 }
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
@@ -75,6 +76,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     window.dispatchEvent(new Event('storage')); // Trigger update in the same tab
     router.push('/login');
   };
+  
+  const userRolId = userData ? parseInt(userData.rol_id, 10) : null;
+  const isAdministrador = userRolId === 16;
+  const isGestor = userRolId === 7;
 
   return (
     <>
@@ -95,70 +100,79 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Proveedores">
-                <Link href="/proveedores">
-                  <Users />
-                  Proveedores
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-              <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Facturas">
-                <Link href="/facturas">
-                  <FileText />
-                  Facturas
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Reportes">
-                <Link href="/reportes/productos">
-                  <ClipboardList />
-                  Reportes
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Configuraciones">
-                <Link href="/configuraciones">
-                  <Settings />
-                  Configuraciones
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Pagos a Proveedores">
-                <Link href="/pagos">
-                  <DollarSign />
-                  Pagos a Proveedores
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Auditoría">
-                <Link href="/auditoria">
-                  <ShieldCheck />
-                  Auditoría
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-              <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Saldos de Proveedor">
-                <Link href="/saldos">
-                  <Scale />
-                  Saldos de Proveedor
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-              <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Tokens API">
-                <Link href="/tokens">
-                  <KeyRound />
-                  Tokens API
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            {(isAdministrador || isGestor) && (
+              <>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Proveedores">
+                    <Link href="/proveedores">
+                      <Users />
+                      Proveedores
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Facturas">
+                    <Link href="/facturas">
+                      <FileText />
+                      Facturas
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Reportes">
+                    <Link href="/reportes/productos">
+                      <ClipboardList />
+                      Reportes
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Saldos de Proveedor">
+                    <Link href="/saldos">
+                      <Scale />
+                      Saldos de Proveedor
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </>
+            )}
+            
+            {isAdministrador && (
+              <>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Configuraciones">
+                    <Link href="/configuraciones">
+                      <Settings />
+                      Configuraciones
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Pagos a Proveedores">
+                    <Link href="/pagos">
+                      <DollarSign />
+                      Pagos a Proveedores
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Auditoría">
+                    <Link href="/auditoria">
+                      <ShieldCheck />
+                      Auditoría
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Tokens API">
+                    <Link href="/tokens">
+                      <KeyRound />
+                      Tokens API
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </>
+            )}
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
