@@ -1,9 +1,6 @@
 
 import { getFacturas, getProveedores } from '@/lib/data';
 import PagosClient from '@/components/pagos/pagos-client';
-import withAuth from '@/components/layout/withAuth';
-
-const AuthenticatedPagosClient = withAuth(PagosClient);
 
 export default async function PagosPage() {
   const [proveedores, facturas] = await Promise.all([
@@ -18,7 +15,7 @@ export default async function PagosPage() {
       <div className="flex items-center">
         <h1 className="text-lg font-semibold md:text-2xl">Pagos a Proveedores</h1>
       </div>
-      <AuthenticatedPagosClient 
+      <PagosClient 
         proveedores={proveedores} 
         facturas={facturasCredito} 
       />

@@ -4,6 +4,7 @@
 import * as React from "react";
 import { format, parseISO } from "date-fns";
 import { es } from 'date-fns/locale';
+import { useRouter } from "next/navigation";
 
 import {
   Accordion,
@@ -28,7 +29,33 @@ interface SaldosPorProveedor {
   facturas: FacturaCompra[];
 }
 
+interface UserData {
+  usuario: string;
+}
+
 export default function PagosClient({ proveedores, facturas }: PagosClientProps) {
+  const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = React.useState(false);
+
+  React.useEffect(() => {
+    try {
+      const storedData = localStorage.getItem('userData');
+      if (storedData) {
+        const userData: UserData = JSON.parse(storedData);
+        if (userData.usuario === 'Administrador') {
+          setIsAuthorized(true);
+        } else {
+          router.replace('/');
+        }
+      } else {
+        router.replace('/login');
+      }
+    } catch (error) {
+      console.error("Authentication check failed", error);
+      router.replace('/login');
+    }
+  }, [router]);
+
   const saldosPorProveedor = React.useMemo(() => {
     const proveedorMap = new Map(proveedores.map(p => [p.cedula_ruc, p]));
     const saldos: Record<string, SaldosPorProveedor> = {};
@@ -71,6 +98,13 @@ export default function PagosClient({ proveedores, facturas }: PagosClientProps)
     }
   };
 
+  if (!isAuthorized) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="text-lg font-semibold">Verificando acceso...</div>
+      </div>
+    );
+  }
 
   return (
     <Card>
