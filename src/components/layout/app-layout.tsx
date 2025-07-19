@@ -163,14 +163,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Tokens API">
-                    <Link href="/tokens">
-                      <KeyRound />
-                      Tokens API
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
               </>
             )}
           </SidebarMenu>
