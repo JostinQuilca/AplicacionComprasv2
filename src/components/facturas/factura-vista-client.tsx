@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -6,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useTransition } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -57,7 +58,7 @@ export default function FacturaVistaClient({ factura, detalles, productos }: Fac
     const formatUTCDate = (dateString: string | null | undefined) => {
         if (!dateString) return 'N/A';
         try {
-            const date = new Date(dateString);
+            const date = parseISO(dateString);
             return format(date, "dd MMMM, yyyy", { locale: es });
         } catch (error) {
             return 'Fecha inválida';

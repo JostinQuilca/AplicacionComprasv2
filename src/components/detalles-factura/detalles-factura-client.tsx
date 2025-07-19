@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -37,10 +38,7 @@ interface DetallesFacturaClientProps {
 const formatUTCDate = (dateString: string | null | undefined) => {
     if (!dateString) return 'N/A';
     try {
-        // The date from the API is already in UTC (e.g., "2024-07-25T00:00:00.000Z")
-        // parseISO will correctly interpret it. To display it in the user's local timezone
-        // without shifting the date, we treat it as a local date.
-        const date = new Date(dateString);
+        const date = parseISO(dateString);
         return format(date, "dd MMM, yyyy", { locale: es });
     } catch (error) {
         console.error("Invalid date string:", dateString, error);
