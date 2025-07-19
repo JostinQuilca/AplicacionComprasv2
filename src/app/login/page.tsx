@@ -54,7 +54,6 @@ export default function LoginPage() {
           description: `Bienvenido, ${result.data.nombre}.`,
         });
         
-        // Guardar datos del usuario en localStorage
         localStorage.setItem('userData', JSON.stringify(result.data));
 
         router.push('/');
