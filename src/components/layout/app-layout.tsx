@@ -184,7 +184,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">{userData.nombre}</p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        {userData.nombre_rol}
+                        {isAdministrador ? 'Administrador' : userData.nombre_rol}
                       </p>
                     </div>
                   </DropdownMenuLabel>
