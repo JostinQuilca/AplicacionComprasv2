@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -103,11 +104,17 @@ const formatDetails = (details: Record<string, any>): string => {
     return JSON.stringify(details, null, 2);
 };
 
-const getDisplayRole = (item: AuditoriaLog): string => {
+const getDisplayUser = (item: AuditoriaLog): string => {
+    // Si el usuario en los detalles es 'Administrador', se le da prioridad.
     if (item.details?.usuario?.toLowerCase() === 'administrador') {
       return 'Administrador';
     }
-    return item.nombre_rol || 'N/A';
+    // Si hay un id_usuario, es una acción de un usuario logueado.
+    if (item.id_usuario !== null) {
+      return item.nombre_rol || 'Usuario';
+    }
+    // Si no hay id_usuario, se asume que es una acción del sistema.
+    return 'Sistema';
 };
 
 
@@ -148,7 +155,7 @@ export default function AuditoriaClient({ initialData }: AuditoriaClientProps) {
       (item) =>
         item.accion.toLowerCase().includes(filter.toLowerCase()) ||
         item.tabla.toLowerCase().includes(filter.toLowerCase()) ||
-        getDisplayRole(item).toLowerCase().includes(filter.toLowerCase()) ||
+        getDisplayUser(item).toLowerCase().includes(filter.toLowerCase()) ||
         (item as any).details_string.toLowerCase().includes(filter.toLowerCase())
     ),
     [sortedData, filter]
@@ -219,7 +226,7 @@ export default function AuditoriaClient({ initialData }: AuditoriaClientProps) {
                             </Badge>
                           </div>
                           <div>{item.tabla}</div>
-                          <div>{getDisplayRole(item)}</div>
+                          <div>{getDisplayUser(item)}</div>
                       </div>
                    </AccordionTrigger>
                    <AccordionContent>
