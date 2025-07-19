@@ -22,7 +22,7 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
         if (storedData) {
           const userData: UserData = JSON.parse(storedData);
           // Check if user role is 'Administrador'
-          if (userData.nombre_rol === 'Administrador') {
+          if (userData.nombre_rol === 'Administrador de Compras') {
             setIsAuthorized(true);
           } else {
             // If not admin, redirect to home
