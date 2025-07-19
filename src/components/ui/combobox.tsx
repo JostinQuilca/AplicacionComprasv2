@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import * as React from "react";
+import { Check, ChevronsUpDown } from "lucide-react";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandDialog,
@@ -13,21 +13,25 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+<<<<<<< HEAD
 } from "@/components/ui/command"
+=======
+} from "@/components/ui/command";
+>>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
 
 export type ComboboxOption = {
-  value: string
-  label: string
-}
+  value: string;
+  label: string;
+};
 
 interface ComboboxProps {
-  options: ComboboxOption[]
-  value?: string
-  onChange: (value: string) => void
-  placeholder?: string
-  searchPlaceholder?: string
-  emptyPlaceholder?: string
-  disabled?: boolean
+  options: ComboboxOption[];
+  value?: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  searchPlaceholder?: string;
+  emptyPlaceholder?: string;
+  disabled?: boolean;
 }
 
 export function Combobox({
@@ -39,7 +43,7 @@ export function Combobox({
   emptyPlaceholder = "No options found.",
   disabled = false,
 }: ComboboxProps) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
 
   return (
     <>
@@ -66,8 +70,13 @@ export function Combobox({
                 key={option.value}
                 value={option.label}
                 onSelect={() => {
+<<<<<<< HEAD
                   onChange(option.value)
                   setOpen(false)
+=======
+                  onChange(option.value);
+                  setOpen(false);
+>>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
                 }}
               >
                 <Check
@@ -83,5 +92,10 @@ export function Combobox({
         </CommandList>
       </CommandDialog>
     </>
+<<<<<<< HEAD
   )
 }
+=======
+  );
+}
+>>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0

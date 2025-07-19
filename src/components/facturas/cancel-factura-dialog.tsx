@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
 "use client";
 
 import {
@@ -29,9 +32,18 @@ export default function CancelFacturaDialog({
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
+<<<<<<< HEAD
           <AlertDialogTitle>¿Está seguro que desea cancelar la factura?</AlertDialogTitle>
           <AlertDialogDescription>
             Esta acción no se puede deshacer. Esto cambiará el estado de la factura "{facturaNumero || "seleccionada"}" a "Cancelada".
+=======
+          <AlertDialogTitle>
+            ¿Está seguro que desea cancelar la factura?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta acción no se puede deshacer. Esto cambiará el estado de la
+            factura "{facturaNumero || "seleccionada"}" a "Cancelada".
+>>>>>>> 6848165a999a2d46fa6bf0e01334dd64a07deef0
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
