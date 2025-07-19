@@ -104,6 +104,13 @@ const formatDetails = (details: Record<string, any>): string => {
     return JSON.stringify(details, null, 2);
 };
 
+const getDisplayRole = (item: AuditoriaLog): string => {
+    if (item.details?.usuario === 'Administrador') {
+      return 'Administrador';
+    }
+    return item.nombre_rol || 'N/A';
+};
+
 
 export default function AuditoriaClient({ initialData }: AuditoriaClientProps) {
   const [data] = React.useState<AuditoriaLog[]>(initialData.map(log => ({
@@ -143,7 +150,7 @@ export default function AuditoriaClient({ initialData }: AuditoriaClientProps) {
         item.accion.toLowerCase().includes(filter.toLowerCase()) ||
         item.modulo.toLowerCase().includes(filter.toLowerCase()) ||
         item.tabla.toLowerCase().includes(filter.toLowerCase()) ||
-        item.nombre_rol.toLowerCase().includes(filter.toLowerCase()) ||
+        getDisplayRole(item).toLowerCase().includes(filter.toLowerCase()) ||
         (item as any).details_string.toLowerCase().includes(filter.toLowerCase())
     ),
     [sortedData, filter]
@@ -218,7 +225,7 @@ export default function AuditoriaClient({ initialData }: AuditoriaClientProps) {
                           </div>
                           <div className="font-medium">{item.modulo}</div>
                           <div>{item.tabla}</div>
-                          <div>{item.nombre_rol || 'N/A'}</div>
+                          <div>{getDisplayRole(item)}</div>
                       </div>
                    </AccordionTrigger>
                    <AccordionContent>
