@@ -15,7 +15,7 @@ import {
   SidebarInset,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { Settings, FileText, DollarSign, ShieldCheck, Scale, KeyRound, Users, Home, LogOut, ShoppingCart, ClipboardList } from 'lucide-react';
+import { Settings, FileText, Scale, ShieldCheck, Users, Home, LogOut, ShoppingCart, ClipboardList } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { ThemeToggle } from './theme-toggle';
 import { useToast } from '@/hooks/use-toast';
 
@@ -89,7 +88,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
   
-  const isAdministrador = userData?.usuario === 'Administrador';
+  const isAdministrador = userData?.usuario?.toLowerCase() === 'administrador';
 
   return (
     <>

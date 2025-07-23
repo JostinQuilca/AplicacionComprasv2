@@ -29,11 +29,9 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
         return;
       }
       
-      // Check if the user is 'Administrador' based on the username
-      if (userData && userData.usuario === 'Administrador') {
+      if (userData && userData.usuario?.toLowerCase() === 'administrador') {
         setIsAuthorized(true);
       } else {
-        // If not authorized, redirect. Redirect to login if no user data, else to dashboard.
         router.replace(userData ? '/dashboard' : '/login');
       }
 
