@@ -16,8 +16,23 @@ async function fetchData<T>(url: string, defaultReturnValue: T): Promise<T> {
     console.error(`API URL is not defined. Cannot fetch from ${url}`);
     return defaultReturnValue;
   }
+  
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  
+  // This function can be called from server components, where sessionStorage is not available.
+  // We add the token only if we are in a browser context.
+  if (typeof window !== 'undefined') {
+    const token = sessionStorage.getItem('authToken');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+  
   try {
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, { 
+        cache: "no-store",
+        headers,
+    });
     if (!res.ok) {
       const errorText = await res.text();
       // Log the error instead of throwing, to prevent page crashes on API errors.
