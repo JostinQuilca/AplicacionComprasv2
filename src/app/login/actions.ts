@@ -16,7 +16,13 @@ type LoginUserData = {
     nombre_rol: string;
 }
 
-type LoginResponse = {
+// Type for the data returned on successful login
+type LoginSuccessData = {
+    usuario: LoginUserData;
+    token: string;
+}
+
+type LoginApiResponse = {
     token: string;
     usuario: LoginUserData;
     permisos: any[];
@@ -24,7 +30,7 @@ type LoginResponse = {
 
 export async function loginAction(
   formData: FormData
-): Promise<ActionResponse<LoginUserData>> {
+): Promise<ActionResponse<LoginSuccessData>> {
   const rawData = Object.fromEntries(formData);
   const validatedFields = loginSchema.safeParse(rawData);
 
@@ -53,12 +59,15 @@ export async function loginAction(
         return { success: false, message: errorData.message || "Credenciales incorrectas o usuario no autorizado." };
     }
     
-    const loginData: LoginResponse = await response.json();
+    const loginData: LoginApiResponse = await response.json();
     
     return {
       success: true,
       message: 'Inicio de sesión exitoso.',
-      data: loginData.usuario,
+      data: {
+        usuario: loginData.usuario,
+        token: loginData.token,
+      }
     };
   } catch (error) {
     console.error('Login action error:', error);

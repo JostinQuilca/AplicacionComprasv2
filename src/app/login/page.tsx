@@ -51,10 +51,11 @@ export default function LoginPage() {
       if (result.success && result.data) {
         toast({
           title: 'Inicio de Sesión Exitoso',
-          description: `Bienvenido, ${result.data.nombre}.`,
+          description: `Bienvenido, ${result.data.usuario.nombre}.`,
         });
         
-        sessionStorage.setItem('userData', JSON.stringify(result.data));
+        sessionStorage.setItem('userData', JSON.stringify(result.data.usuario));
+        sessionStorage.setItem('authToken', result.data.token);
 
         router.push('/dashboard');
       } else {

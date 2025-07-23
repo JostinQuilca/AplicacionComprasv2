@@ -61,6 +61,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   
   const handleLogout = () => {
     sessionStorage.removeItem('userData');
+    sessionStorage.removeItem('authToken');
     setUserData(null);
     toast({
         title: "Sesión Cerrada",
