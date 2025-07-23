@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpDown, ChevronDown, Filter } from "lucide-react";
+import { ArrowUpDown, ChevronDown, Filter, Download } from "lucide-react";
 import { AuditoriaLog } from "@/lib/types";
 import { Card } from "../ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -176,6 +176,40 @@ export default function AuditoriaClient({ initialData }: AuditoriaClientProps) {
     setSortConfig({ key, direction });
     setCurrentPage(1);
   };
+  
+  const handleExportCSV = () => {
+    const headers = ["Fecha y Hora", "Acción", "Tabla", "Usuario/Rol", "Detalles"];
+    
+    // Function to escape CSV fields
+    const escapeCsvField = (field: any): string => {
+        const stringField = String(field);
+        if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
+            return `"${stringField.replace(/"/g, '""')}"`;
+        }
+        return stringField;
+    };
+    
+    const csvContent = [
+        headers.join(','),
+        ...filteredData.map(item => [
+            escapeCsvField(formatUTCDate(item.timestamp)),
+            escapeCsvField(item.accion),
+            escapeCsvField(item.tabla),
+            escapeCsvField(getDisplayUser(item)),
+            escapeCsvField(JSON.stringify(item.details))
+        ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `auditoria_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const gridTemplateColumns = "50px minmax(200px, 1fr) 150px 150px minmax(150px, 1fr)";
 
@@ -194,6 +228,10 @@ export default function AuditoriaClient({ initialData }: AuditoriaClientProps) {
               className="pl-10"
             />
           </div>
+           <Button onClick={handleExportCSV} variant="outline">
+              <Download className="mr-2 h-4 w-4" />
+              Exportar a CSV
+            </Button>
         </div>
         <Card className="border shadow-sm rounded-lg overflow-hidden">
           {/* Header */}
