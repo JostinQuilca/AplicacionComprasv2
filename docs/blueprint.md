@@ -7,7 +7,7 @@
 - Supplier Registration Form: Enable the addition of new suppliers via a modal form, with fields for `cedula_ruc`, `nombre`, `ciudad`, `tipo_proveedor`, and other relevant details.
 - Row Deletion with Confirmation: Provide a confirmation dialog before permanently removing a supplier from the database. Table ID derives from 'id' or 'cedula_ruc'
 
-## Style Guidelines:
+## Style Guidelines :
 
 - Primary color: Saturated blue (#3B82F6) to convey trust and reliability, reflecting the app's role in supplier management.
 - Background color: Light blue (#F0F9FF) to provide a clean, non-intrusive backdrop that keeps the focus on the data.
