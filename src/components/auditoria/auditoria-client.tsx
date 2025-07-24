@@ -318,5 +318,3 @@ export default function AuditoriaClient({ initialData }: AuditoriaClientProps) {
       </div>
   );
 }
-
-    
